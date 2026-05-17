@@ -20,18 +20,22 @@ Step 1 code
     <h1>Users from Database</h1>
     <table border="1">
         <tr>
-            <th>ID</th><th>Name</th><th>Email</th>
+            <th>ID</th><th>Name</th><th>Email</th><th>Delete</th>
         </tr>
         {% for user in users %}
         <tr>
             <td>{{ user.user_id }}</td>
             <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
-        </tr>
+            
         <!--add a button that uses the delete route-->
-        <form method="POST" action="/delete/{{ user.id }}">
+        <!--changed the delete button to map the users on their rows-->
+        <td>
+        <form method="POST" action="/delete/{{ user.user_id }}"> <!--chamged id to user_id to match the database-->
             <button type="submit">Delete</button>
         </form>
+        </td>
+        </tr>
         {% endfor %}
     </table>
 

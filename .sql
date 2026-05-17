@@ -28,3 +28,21 @@ CREATE TABLE user_roles (
 ); 
 
 INSERT INTO user_roles VALUES (1,1);
+
+-- added this attributes to try low scale ABAC
+ALTER TABLE users
+ADD trust_level ENUM("high", "medium", "low") NOT NULL DEFAULt "low";
+
+ALTER TABLE users
+ADD status ("active", "suspended", "pending") NOT NULL DEFAULT "pending";
+
+--inserted a new user to see if the default works
+INSERT INTO users (name, email) VALUES 
+("mockuser","mockuser@gmail.com");
+
+DESCRIBE users;
+
+--updated the admin esque to have high trust and stat active
+UPDATE users 
+SET trust_level = 'high', status = 'active' 
+WHERE name = 'lee';
