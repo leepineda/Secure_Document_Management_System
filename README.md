@@ -1,0 +1,1 @@
+flask_mysql_app — A learning project documenting my journey building a security-focused Flask + MySQL application. This repo includes the code and a running diary of concepts learned. Started May 2026.
