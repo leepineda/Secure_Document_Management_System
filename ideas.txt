@@ -55,4 +55,10 @@ actually use them not just think
 
 MAY 19 2026
 Changed the search and delete route to use try/finally and updated the debug=True to False, and tried to do some joins.
-nothing much happened today, maybe next time i'd make a simple login page with a hash to try my access controls
+nothing much happened today, maybe next time i'd make a simple login page with a hash to try my access controls. I have an 
+idea that's been bugging me for a while but i think im still not ready for it is for my app to implement a WAL since what if
+the database goes down and a transaction got cut off i want to be able to go into 11:58 and see the lost query? data? 
+i dont know what its called, my thoughts was before i execute a query i will send a text of that query on a log file lmaoo 
+and also implement database encryption on the db itself because what if the db got compromised they can just dump a .db and
+theyll see all data and thats BADDD fr fr and also i should add some RLS my teacher said that also that you dont want someone
+to see what's not theirs my teacher the bomb fr
