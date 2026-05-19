@@ -42,4 +42,13 @@ got introduced to security architecture that's why I made a pdp.py or Policy Dec
 of Policy Enforcement Point the workflow that i discovered is PEP > Context > PDP > DB Execution, this checks a lot of things
 but I told myself since if i create a PDP and this functions on the main app like one file one app, wouldnt it be worthless if
 an attacker compromised the app itself? No? I'll keep that in mind but I'll try to do this first on the app, and ill also be
-learning docker and railway so i can host not just on localhost.
+learning docker and railway so i can host not just on localhost. I also haven't done a simple login check and register check those 
+are my next steps to try and use the access controls i've been learning, I also left my home and search routes open connections but 
+don't use a try/finally structure like my add route, and also i need to watch out about that debug true on my code, ill
+look into it later
+
+MAY 18 2026 WHERE I'm at and where I wanna be
+I want to be a security first person to be able to transform my knowledge into real things and not just all bark no bite
+Right now I can't do stored procedures and I still struggle with joins and how to implement things, to be honest I'm lost 
+I dont know where im heading but Ill do my best to show up every day i have the theories on my head i wanna transform and 
+actually use them not just think

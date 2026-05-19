@@ -33,13 +33,23 @@ def home():
 def search():
     query = request.args.get("q", "")   # reads ?q=Alice from the URL
     connection = get_connection()
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "SELECT * FROM users WHERE name LIKE %s",
-            (f"%{query}%",)
-        )
-        results = cursor.fetchall()
-    connection.close()
+    results = []
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM users WHERE name LIKE %s",
+                (f"%{query}%",)
+            )
+            results = cursor.fetchall()
+
+    except Exception as e:
+        print(f"Database error occured: {e}")
+        return "An error occurred while searching.", 400
+
+    finally:    
+        connection.close()
+
     return render_template("search.html", results=results, query=query)
 
 #add a post Route ADDING/CREATING
@@ -81,12 +91,22 @@ def add_user():
 @app.route("/delete/<int:user_id>", methods=["POST"])
 def delete_user(user_id):
     connection = get_connection()
-    with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
-    connection.commit()
-    connection.close()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+
+        connection.commit()
+
+    except Exception as e:
+        connection.rollback()
+        print (f"Database error occured: {e}")
+        return "An error occured while deleting a user.", 500
+
+    finally:
+        connection.close()
+
     return redirect("/")
 
 #initialize the application
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False) #made false
