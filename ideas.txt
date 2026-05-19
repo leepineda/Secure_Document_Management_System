@@ -52,3 +52,7 @@ I want to be a security first person to be able to transform my knowledge into r
 Right now I can't do stored procedures and I still struggle with joins and how to implement things, to be honest I'm lost 
 I dont know where im heading but Ill do my best to show up every day i have the theories on my head i wanna transform and 
 actually use them not just think
+
+MAY 19 2026
+Changed the search and delete route to use try/finally and updated the debug=True to False, and tried to do some joins.
+nothing much happened today, maybe next time i'd make a simple login page with a hash to try my access controls

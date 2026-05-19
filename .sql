@@ -46,3 +46,14 @@ DESCRIBE users;
 UPDATE users 
 SET trust_level = 'high', status = 'active' 
 WHERE name = 'lee';
+
+-- this is wrong
+SELECT u.name, r.role_name AS user_role 
+FROM users u
+JOIN roles r ON u.role_id = r.user_id;
+
+--i needed 2 joins since i have 3 tables actually
+SELECT u.name, r.role_name AS user_roles
+FROM users u
+JOIN user_roles ur ON u.user_id = ur.user_id
+JOIN roles r ON ur.role_id = r.role_id;
