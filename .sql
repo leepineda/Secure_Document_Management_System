@@ -57,3 +57,7 @@ SELECT u.name, r.role_name AS user_roles
 FROM users u
 JOIN user_roles ur ON u.user_id = ur.user_id
 JOIN roles r ON ur.role_id = r.role_id;
+
+--UPDATED THE status column it didnt have ENUMMM
+ALTER TABLE users 
+MODIFY COLUMN status ENUM("active", "suspended", "pending") NOT NULL DEFAULT "pending";
