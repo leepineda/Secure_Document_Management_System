@@ -25,35 +25,30 @@ MAY 16, 2026
 I added a simple SQL file that showed my database creation using raw sql so I have mock data, some users on my test app i added
 using the no css UI lol.
 
-This is where I also learned about GHOST USERS when a query cuts midway like the database got shutdown the process might not be saved 
-worse may be incomplete, So i used transaction equivalent a try catch logic so that it only commits it when all the functions are
-done if it isnt done it rollsback like nothing happened
+This is where I also learned about GHOST USERS when a query cuts midway like the database got shutdown the process might not be saved worse may be incomplete, So i used transaction equivalent a try catch logic so that it only commits it when all the functions are done if it isnt done it rollsback like nothing happened
 
 MAY 17, 2026 
 ------------
-This is probably the biggest and the most humbling experience I had as of the creation, I was trynna use RBAC and i thought to myself, what
-if I just do stored procedures for everything and just make a user that can execute it? I sounded so proud like that's bulletproof
-to sql injections, but then if we scale things RBAC alone won't cut it and stored procedures won't cut it alone, so as I was
-scrolling YouTube, I stumbled upon this video titled RBAC vs ABAC by IBM Technology.
+This is probably the biggest and the most humbling experience I had as of the creation, I was trynna use RBAC and i thought to myself, what if I just do stored procedures for everything and just make a user that can execute it? I sounded so proud like that's bulletproof to sql injections, but then if we scale things RBAC alone won't cut it and stored procedures won't cut it alone, so as I was scrolling YouTube, I stumbled upon this video titled RBAC vs ABAC by IBM Technology.
 reference here: https://youtu.be/rvZ35YW4t5k?si=gR4FwxZoCp4TDKUI
+
 And it introduced me to one step further from RBAC it's ABAC and that's why i also modified my sql tables to add trust_level and 
 account status, to help me prepare how to navigate this new knowledge. It's basically a much stricter than RBAC and I also 
 got introduced to security architecture that's why I made a pdp.py or Policy Decision Point  and I also learned about the concept
 of Policy Enforcement Point the workflow that i discovered is PEP > Context > PDP > DB Execution, this checks a lot of things
 but I told myself since if i create a PDP and this functions on the main app like one file one app, wouldnt it be worthless if
 an attacker compromised the app itself? No? I'll keep that in mind but I'll try to do this first on the app, and ill also be
-learning docker and railway so i can host not just on localhost. I also haven't done a simple login check and register check those 
-are my next steps to try and use the access controls i've been learning, I also left my home and search routes open connections but 
-don't use a try/finally structure like my add route, and also i need to watch out about that debug true on my code, ill
-look into it later
+learning docker and railway so i can host not just on localhost. I also haven't done a simple login check and register check those are my next steps to try and use the access controls i've been learning, I also left my home and search routes open connections but don't use a try/finally structure like my add route, and also i need to watch out about that debug true on my code, illlook into it later
 
 MAY 18 2026 WHERE I'm at and where I wanna be
+------------
 I want to be a security first person to be able to transform my knowledge into real things and not just all bark no bite
 Right now I can't do stored procedures and I still struggle with joins and how to implement things, to be honest I'm lost 
 I dont know where im heading but Ill do my best to show up every day i have the theories on my head i wanna transform and 
 actually use them not just think
 
 MAY 19 2026
+------------
 Changed the search and delete route to use try/finally and updated the debug=True to False, and tried to do some joins.
 nothing much happened today, maybe next time i'd make a simple login page with a hash to try my access controls. I have an 
 idea that's been bugging me for a while but i think im still not ready for it is for my app to implement a WAL since what if
@@ -62,3 +57,12 @@ i dont know what its called, my thoughts was before i execute a query i will sen
 and also implement database encryption on the db itself because what if the db got compromised they can just dump a .db and
 theyll see all data and thats BADDD fr fr and also i should add some RLS my teacher said that also that you dont want someone
 to see what's not theirs my teacher the bomb fr
+
+MAY 20 2026
+------------
+I encountered a problem, since i only designed three tables users, roles, and user_roles, I didn't make way for a register function
+so i might overhaul the entire database, I mean that's the first thing we actually write down the tables and schemas first and
+normalize them, but i was sidetracked on doing RBAC and ABAC i completely forgot we need more tables so that's on me, im gonna 
+mark this on my mind to first make the tables that handle register, login, auth and things so i dont have to refactor again, 
+I made a simple html file that registers but because the db isnt configured i might need to tweak and add it a little, but that's
+enough for today, been tired cuz been working all day tiring, still a good hurdle for me to overcome

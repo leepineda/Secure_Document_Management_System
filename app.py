@@ -107,6 +107,9 @@ def delete_user(user_id):
 
     return redirect("/")
 
+@app.route("/register", methods =["GET", "POST"])
+#gonna come back to this later
+
 #initialize the application
 if __name__ == "__main__":
     app.run(debug=False) #made false
