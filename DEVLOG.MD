@@ -66,3 +66,14 @@ normalize them, but i was sidetracked on doing RBAC and ABAC i completely forgot
 mark this on my mind to first make the tables that handle register, login, auth and things so i dont have to refactor again, 
 I made a simple html file that registers but because the db isnt configured i might need to tweak and add it a little, but that's
 enough for today, been tired cuz been working all day tiring, still a good hurdle for me to overcome
+
+MAY 21 2026
+I have a very huge huge hurdle, my database schema wont hold up, im currently trying to design it
+My schema is absolute dogshit, like what
+I think ill make an ERD first so i can map this all out, my thoughts and maybe even schemas and things, i need some time i said i need to tweak something a little but its not a little tweak 
+I wanna answer on my database Who are you? What are ya trynna do? Is you gon rob me or what? Evidence?? huhh
+man why did i think three tables was enough for this aint no way
+
+--and also a quick note from my notes app from the phone--
+
+So I've been wrestling with joins, and i had a thought that JOIN and ON are always connected, and the table that we apply to FROM table is basically what we SELECT table.first_table, if we select a column on a table, what we selected is what table we should add on the FROM clause. Okay things changed i learned that it doesn't matter the order of the tables as long as what you're selecting is included in the FROM or JOIN 
