@@ -81,4 +81,4 @@ So I've been wrestling with joins, and i had a thought that JOIN and ON are alwa
 
 MAY 22 2026
 -----------
-Nothing much happened today, just created the schema for the new database and sql, I'm gonna update my routes next and get back in track.
+Nothing much happened today, just created the schema for the new database and sql, I'm gonna update my routes next and get back in track. Been tired I just got my license and got beat up by work at the afternoon, but hey i pushed through
