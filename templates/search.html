@@ -3,6 +3,6 @@
     <button type="submit">Search</button>
 </form>
  
-{% for user in results %}
-    <p>{{ user.name }} - {{ user.email }}</p>
+{% for user_accounts in results %}
+    <p>{{ user_accounts.username }} - {{ user_accounts.email }}</p>
 {% endfor %}

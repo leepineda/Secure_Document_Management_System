@@ -22,16 +22,16 @@ Step 1 code
         <tr>
             <th>ID</th><th>Name</th><th>Email</th><th>Delete</th>
         </tr>
-        {% for user in users %}
+        {% for user in user_accounts %}
         <tr>
-            <td>{{ user.user_id }}</td>
-            <td>{{ user.name }}</td>
+            <td>{{ user.account_id }}</td>
+            <td>{{ user.username }}</td>
             <td>{{ user.email }}</td>
             
         <!--add a button that uses the delete route-->
         <!--changed the delete button to map the users on their rows-->
         <td>
-        <form method="POST" action="/delete/{{ user.user_id }}"> <!--chamged id to user_id to match the database-->
+        <form method="POST" action="/delete/{{ user.account_id }}"> <!--chamged id to account_id to match the database-->
             <button type="submit">Delete</button>
         </form>
         </td>
@@ -39,8 +39,9 @@ Step 1 code
         {% endfor %}
     </table>
 
-    <a href="/add"><button>Add User</button></a>
+    <a href="/register"><button>Register</button></a>
     <a href="/search"><button>Search User</button></a>
+    <a href="/login"><button>Login</button></a>
 
 </body>
 </html>

@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect
+from werkzeug.security import generate_password_hash #added bycrypt import
 import pymysql
 
 load_dotenv()   # reads .env and puts values into os.environment
@@ -21,12 +22,20 @@ def get_connection():
 def home():
     #we added this block to fetch data from the users table
     connection = get_connection()
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM users")
-        users = cursor.fetchall()
-    connection.close()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM user_accounts ")
+            user_accounts = cursor.fetchall()
+        
+    except Exception as e:
+        print(f"Database error occured: {e}")
+        return "An error occurred: index.", 400
+
+    finally:    
+        connection.close()
     #until here
-    return render_template("index.html", users=users)
+    return render_template("index.html", user_accounts=user_accounts)
 
 #add a search route sql syntax still
 @app.route("/search")
@@ -38,7 +47,7 @@ def search():
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT * FROM users WHERE name LIKE %s",
+                "SELECT * FROM user_accounts WHERE username LIKE %s ",
                 (f"%{query}%",)
             )
             results = cursor.fetchall()
@@ -52,7 +61,7 @@ def search():
 
     return render_template("search.html", results=results, query=query)
 
-#add a post Route ADDING/CREATING
+"""#add a post Route ADDING/CREATING
 @app.route("/add", methods=["GET", "POST"])
 def add_user():
     if request.method == "POST":
@@ -63,13 +72,13 @@ def add_user():
         try: #changed the logic to use a try catch error or a transaction equivalent
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "INSERT INTO users (name, email) VALUES (%s, %s)",
+                    "INSERT INTO users (name, email) VALUES (%s, %s) ",
                     (name, email)
                 )
                 new_user_id = cursor.lastrowid 
 
                 cursor.execute(
-                    "INSERT INTO user_roles (user_id, role_id) VALUES (%s, %s)",
+                    "INSERT INTO user_roles (user_id, role_id) VALUES (%s, %s) ",
                     (new_user_id, 3)
                 )
 
@@ -85,15 +94,15 @@ def add_user():
             connection.close()
            
     return render_template("add.html")
-    #add redirect import at the top 
+    #add redirect import at the top """
 
 #delete route, note that a route is like a function
-@app.route("/delete/<int:user_id>", methods=["POST"])
-def delete_user(user_id):
+@app.route("/delete/<int:account_id>", methods=["POST"])
+def delete_user(account_id):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+            cursor.execute("DELETE FROM user_accounts WHERE account_id = %s ", (account_id,))
 
         connection.commit()
 
@@ -108,7 +117,72 @@ def delete_user(user_id):
     return redirect("/")
 
 @app.route("/register", methods =["GET", "POST"])
-#gonna come back to this later
+#came backk
+def register():
+
+    if request.method == "POST":
+        email = request.form["email"]
+        username = request.form["username"]
+        password = request.form["password"]
+        
+        password_hash = generate_password_hash(password) # we use bcrypt here and hash teh pass before inserting onto database
+
+        connection = get_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "INSERT INTO user_accounts " #user registers here
+                    "(email, username) "
+                    "VALUES (%s, %s) ",
+                    (email, username)
+                )
+
+                account_id = cursor.lastrowid
+
+                cursor.execute(
+                    "INSERT INTO user_credentials " #we hash their password
+                    "(account_id, password_hash) "
+                    "VALUES (%s, %s) ",
+                    (account_id, password_hash)
+                )
+
+                cursor.execute( #insert role 
+                    "INSERT INTO user_roles "
+                    "(account_id, role_id) "
+                    "VALUES (%s, %s) ",
+                    (account_id, 3)
+                )
+
+                cursor.execute(
+                    "INSERT INTO security_audit_logs " #make a sec log
+                    "(account_id, action_performed, resource_affected, ip_address, status) "
+                    "VALUES (%s, %s, %s, %s, %s) ",
+                    (
+                        account_id,
+                        "Account Registration",
+                        "user_accounts",
+                        request.remote_addr, #gets the ip address of the registered user
+                        "ALLOWED"
+                    )
+                )
+
+            connection.commit()
+
+            return redirect("/login")
+
+        except pymysql.MySQLError as e:
+            connection.rollback()
+            print(f"Database error: {e}")
+            return "Registration failed.", 500
+
+        finally:
+            connection.close()
+
+    return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    return render_template("login.html")
 
 #initialize the application
 if __name__ == "__main__":

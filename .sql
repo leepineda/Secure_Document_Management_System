@@ -71,6 +71,12 @@ CREATE TABLE departments (
     department_name VARCHAR(100) NOT NULL UNIQUE
 );
 
+INSERT INTO departments (department_name) VALUES 
+    ('Human Resources'),
+    ('Finance'),
+    ('IT'),
+    ('Security');
+
 CREATE TABLE user_accounts (
     account_id INT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -94,6 +100,12 @@ CREATE TABLE roles (
     role_name VARCHAR(24) NOT NULL UNIQUE
 );
 
+INSERT INTO roles (role_name) VALUES 
+    ("admin"), 
+    ("moderator"),
+    ("user");
+
+
 CREATE TABLE user_roles (
     account_id INT,
     role_id INT,
@@ -110,6 +122,7 @@ CREATE TABLE documents (
     department_id INT,
     clearance_required ENUM('public', 'internal', 'confidential', 'top_secret') DEFAULT 'internal',
     requires_mfa BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, --added timestamps
     FOREIGN KEY (owner_id) REFERENCES user_accounts(account_id) ON DELETE CASCADE,
     FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE SET NULL
 );

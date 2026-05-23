@@ -82,3 +82,32 @@ So I've been wrestling with joins, and i had a thought that JOIN and ON are alwa
 MAY 22 2026
 -----------
 Nothing much happened today, just created the schema for the new database and sql, I'm gonna update my routes next and get back in track. Been tired I just got my license and got beat up by work at the afternoon, but hey i pushed through
+
+MAY 23 2026
+-----------
+So i'm trying to think some ways, the flow is as follows
+register = username, email, password
+ADMIN checks the pending account and updates the data, assign department and make the acc active, or even trust_level
+also i encountered a buncha errors like 404 not found for login and its because i didnt add a login route, also updated the things
+where it uses users instead of user_accounts, and i learned that we add space on a query like this
+
+"INSERT INTO user_roles "
+"(account_id, role_id) "
+"VALUES (%s, %s) "
+
+look we added spaces since this translates into sql its good practice to always include spaces on it
+also i encountered a lot of errors i created the database but didnt enter any values into department and users and roles, and also im contemplating if ii shouldve just made the action_performed on the sec logs use ENUM like the status and trust_level, since i think action performed changes everytime no? i also changed all of the things on the routes that used the old sql file. I'm gonna add a login later and also try to add more like input validation both frontend and backend, things like that, and after the login and the other things are good im gonna go add the PDP and PEP
+
+thigs i did today 
+- added register
+- added try/finally on home route
+- updated sql
+- replaced old database names on the html files
+
+problems i encountered 
+- errors because i didnt make a login route
+- errors because of naming conflict, didnt update the routes and html
+
+what's next
+- login page
+- input validation (front n back)
