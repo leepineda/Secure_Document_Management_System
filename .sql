@@ -136,4 +136,4 @@ CREATE TABLE security_audit_logs ( -- append only, no altering data only enter
     status ENUM('ALLOWED', 'DENIED', 'ERROR') NOT NULL,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (account_id) REFERENCES user_accounts(account_id) ON DELETE SET NULL
-);
+); 

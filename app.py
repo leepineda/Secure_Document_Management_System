@@ -116,6 +116,27 @@ def delete_user(account_id):
 
     return redirect("/")
 
+@app.route("/login", methods = ["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        password_hash 
+        #reverse the hash check it
+        #select from username password
+        #check if match
+        #if not match no user available
+        #if match enter app
+    
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT "
+            )
+
 @app.route("/register", methods =["GET", "POST"])
 #came backk
 def register():
