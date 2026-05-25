@@ -111,6 +111,3 @@ problems i encountered
 what's next
 - login page
 - input validation (front n back)
-
-MAY 24
-As i was checking my sql database i saw the security logs show NULL for the deleted users, woulnt that be bad? i think i need a archive for this, and as my teacher said we never delete things, we just archive them so, id look into that later

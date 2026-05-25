@@ -1,6 +1,20 @@
 <!DOCTYPE html>
-    <head>LOGIN</head>
-        <body>
-            Login page
-        </body>
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login Page</h2>
+
+    <form action="/login" method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required autocomplete="username">
+        <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password">
+        <br>
+        <button type="submit">Sign In</button>
+    </form>
+    <p>Don't have an account? <a href="/register">Register here</a></p>
+</body>
 </html>

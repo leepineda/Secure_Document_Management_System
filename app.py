@@ -1,12 +1,21 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect
-from werkzeug.security import generate_password_hash #added bycrypt import
+from flask import Flask, render_template, request, redirect, session, flash, url_for
+from werkzeug.security import generate_password_hash #added scrypt import
+from werkzeug.security import check_password_hash #for checking hash
 import pymysql
 
 load_dotenv()   # reads .env and puts values into os.environment
 
 app = Flask(__name__)
+
+app.secret_key = os.getenv("SECRET_KEY")
+
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True, 
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SAMESITE='Lax' 
+)
 
 #Sql connection 
 def get_connection():
@@ -20,6 +29,12 @@ def get_connection():
 
 @app.route("/")
 def home():
+
+    if 'account_id' not in session:
+        flash("You must be logged in to view this page.")
+        return redirect(url_for("login"))
+
+    current_user_id = session['account_id'] #if they are logged in take their data
     #we added this block to fetch data from the users table
     connection = get_connection()
 
@@ -27,6 +42,9 @@ def home():
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM user_accounts ")
             user_accounts = cursor.fetchall()
+
+            cursor.execute("SELECT * FROM documents")
+            documents = cursor.fetchall()
         
     except Exception as e:
         print(f"Database error occured: {e}")
@@ -35,7 +53,7 @@ def home():
     finally:    
         connection.close()
     #until here
-    return render_template("index.html", user_accounts=user_accounts)
+    return render_template("index.html", user_accounts=user_accounts, documents=documents)
 
 #add a search route sql syntax still
 @app.route("/search")
@@ -123,19 +141,50 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        password_hash 
+        #password_hash 
         #reverse the hash check it
         #select from username password
         #check if match
         #if not match no user available
         #if match enter app
     
-    connection = get_connection()
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT "
-            )
+        connection = get_connection()
+        try:
+            with connection.cursor() as cursor: #removed the filter status and added messages
+                sql = """
+                    SELECT ua.account_id, ua.status, uc.password_hash 
+                    FROM user_accounts ua 
+                    JOIN user_credentials uc ON ua.account_id = uc.account_id 
+                    WHERE ua.username = %s
+                """
+                    
+                cursor.execute(sql, (username,))
+                user = cursor.fetchone()
+
+                if user and check_password_hash(user["password_hash"], password):
+                    
+                    if user["status"] == "active":
+                        session["account_id"] = user["account_id"]
+                        return redirect(url_for("home"))
+                        
+                    elif user["status"] == "suspended":
+                        flash("This account has been suspended. Please contact support.")
+                        return redirect(url_for("login"))
+                        
+                    elif user["status"] == "pending":
+                        flash("Your account registration is still pending approval.")
+                        return redirect(url_for("login"))
+                        
+                    else:
+                        flash("Account status abnormal. Access denied.")
+                        return redirect(url_for("login"))
+                else:
+                    flash("Invalid username or password.")
+                    return redirect(url_for("login"))
+        finally:
+            connection.close()
+
+    return render_template("login.html")
 
 @app.route("/register", methods =["GET", "POST"])
 #came backk
@@ -146,7 +195,7 @@ def register():
         username = request.form["username"]
         password = request.form["password"]
         
-        password_hash = generate_password_hash(password) # we use bcrypt here and hash teh pass before inserting onto database
+        password_hash = generate_password_hash(password) # we use scrypt here and hash teh pass before inserting onto database
 
         connection = get_connection()
         try:
@@ -161,7 +210,7 @@ def register():
                 account_id = cursor.lastrowid
 
                 cursor.execute(
-                    "INSERT INTO user_credentials " #we hash their password
+                    "INSERT INTO user_credentials "
                     "(account_id, password_hash) "
                     "VALUES (%s, %s) ",
                     (account_id, password_hash)
@@ -201,9 +250,13 @@ def register():
 
     return render_template("register.html")
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    return render_template("login.html")
+@app.route("/logout")
+def logout():
+    session.pop('account_id', None) #remove the session from acc id
+    
+    flash("You have been successfully logged out.")
+    
+    return redirect(url_for("login"))
 
 #initialize the application
 if __name__ == "__main__":

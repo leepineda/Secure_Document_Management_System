@@ -39,9 +39,26 @@ Step 1 code
         {% endfor %}
     </table>
 
+    <h1>Documents</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th><th>Title</th><th>Content</th><th>Clearance</th><th>MFA Required</th>
+        </tr>
+        {% for doc in documents %}
+        <tr>
+            <td>{{ doc.document_id }}</td>
+            <td>{{ doc.title }}</td>
+            <td>{{ doc.content }}</td>
+            <td>{{ doc.clearance_required }}</td>
+            <td>{{ doc.requires_mfa }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
     <a href="/register"><button>Register</button></a>
     <a href="/search"><button>Search User</button></a>
-    <a href="/login"><button>Login</button></a>
+    <a>Welcome! <a href="{{ url_for('logout') }}">Log Out</a>
+
 
 </body>
 </html>
