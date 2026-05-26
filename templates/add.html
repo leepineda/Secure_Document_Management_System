@@ -1,12 +1,43 @@
-<h2>Add a New User</h2>
- 
-<form method="POST" action="/add">
-    <label>Name:</label>
-    <input type="text" name="name" required>
-    <br>
-    <label>Email:</label>
-    <input type="email" name="email" required>
-    <br>
-    <button type="submit">Add User</button>
-</form>
+<!DOCTYPE html>
+<head>
+    <title>Add New Document</title>
+</head>
+<body>
 
+    <h2>Add New Document</h2>
+    <form action="/add" method="POST">
+        
+        <p>
+            <label for="title">Document Title *</label><br>
+            <input type="text" id="title" name="title" required placeholder="Enter document title">
+        </p>
+
+        <p>
+            <label for="content">Content</label><br>
+            <textarea id="content" name="content" rows="10" cols="50" placeholder="Type document text here..."></textarea>
+        </p>
+
+        <p>
+            <label for="clearance_required">Clearance Level Required</label><br>
+            <select id="clearance_required" name="clearance_required">
+                <option value="public">Public</option>
+                <option value="internal" selected>Internal</option>
+                <option value="confidential">Confidential</option>
+                <option value="top_secret">Top Secret</option>
+            </select>
+        </p>
+
+        <p>
+            <label for="department_id">Department ID (Optional)</label><br>
+            <input type="number" id="department_id" name="department_id" placeholder="e.g. 101">
+        </p>
+
+        <p>
+            <button type="submit">Save Document</button>
+            <a href="/home">Cancel</a>
+        </p>
+
+    </form>
+
+</body>
+</html>

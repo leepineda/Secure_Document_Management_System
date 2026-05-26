@@ -6,11 +6,13 @@ Format: Added / Changed / Fixed / Removed / Security / Known Issues
 ## 1.0.1
 Added
 ---
--  Documents table displayed on home route — all authenticated users can view all documents
+- Documents table displayed on home route — all authenticated users can view all documents
+- Added a add document route that adds/creates new documents
 
 Known issues
 ---
 - Documents visible to all authenticated users regardless of role, department, or clearance level
+- Anyone can make documents, regarding role and attribute
 
 ## 1.0.0 — 2026-05-25 — MVP
 

@@ -79,41 +79,6 @@ def search():
 
     return render_template("search.html", results=results, query=query)
 
-"""#add a post Route ADDING/CREATING
-@app.route("/add", methods=["GET", "POST"])
-def add_user():
-    if request.method == "POST":
-        name = request.form["name"]    # reads from the form
-        email = request.form["email"]
-
-        connection = get_connection()
-        try: #changed the logic to use a try catch error or a transaction equivalent
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "INSERT INTO users (name, email) VALUES (%s, %s) ",
-                    (name, email)
-                )
-                new_user_id = cursor.lastrowid 
-
-                cursor.execute(
-                    "INSERT INTO user_roles (user_id, role_id) VALUES (%s, %s) ",
-                    (new_user_id, 3)
-                )
-
-            connection.commit()   #save the change AFTER its done
-            return redirect("/")  # go back to home page IF THE TRANSACTION IS SUCNESFUL
-
-        except Exception as e:
-            connection.rollback() #rollback when the transaction fails
-            print(f"Database error occured: {e}")
-            return "An error occurred while creating the user.", 500
-
-        finally:    
-            connection.close()
-           
-    return render_template("add.html")
-    #add redirect import at the top """
-
 #delete route, note that a route is like a function
 @app.route("/delete/<int:account_id>", methods=["POST"])
 def delete_user(account_id):
@@ -134,19 +99,58 @@ def delete_user(account_id):
 
     return redirect("/")
 
+@app.route("/add", methods = ["GET", "POST"])
+def add():
+
+    if "account_id" not in session:
+        flash("You must be logged in to add a document.")
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+
+        title = request.form.get("title")
+        content = request.form.get("content")
+        clearance_required = request.form.get("clearance_required")
+
+        department_id = request.form.get("department_id")
+        if department_id == "":
+            department_id = None
+
+        if not title:
+            flash("Title is required")
+            return render_template("add.html")
+
+        owner_id = session["account_id"]
+
+        connection = get_connection()
+        try: 
+            with connection.cursor() as cursor:
+                sql = """
+                    INSERT INTO documents (title, content, owner_id, department_id, clearance_required)
+                    VALUES (%s, %s, %s, %s, %s)
+                """
+                cursor.execute(sql, (title, content, owner_id, department_id, clearance_required))
+
+            connection.commit()
+            flash("Document added successfully!")
+            return redirect(url_for("home"))
+
+        except Exception as e:
+            connection.rollback()
+            flash("An error occurred while saving the document. Please try again.")
+            print(f"Error {e}")
+        
+        finally:
+            connection.close()
+
+    return render_template("add.html")
+
 @app.route("/login", methods = ["GET", "POST"])
 def login():
 
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-
-        #password_hash 
-        #reverse the hash check it
-        #select from username password
-        #check if match
-        #if not match no user available
-        #if match enter app
     
         connection = get_connection()
         try:

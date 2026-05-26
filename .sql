@@ -17,7 +17,8 @@ CREATE TABLE roles (
     role_name VARCHAR (24) NOT NULL
 );
 
-INSERT INTO roles (role_name) VALUES ("admin"),("editor"),("viewer");
+INSERT INTO roles (role_name) VALU
+ES ("admin"),("editor"),("viewer");
 
 CREATE TABLE user_roles (
     user_id INT,
