@@ -34,7 +34,7 @@ added a documents viewer, no filtering yet —
 every authenticated user sees everything including confidential. 
 that's the next thing to fix.
 
-MAY 27
+MAY 26
 ---
 Made add documents  (no alert, no delete)
 
@@ -64,3 +64,8 @@ I also think this is what netflix and youtube, spotify uses. Maybe not all for s
 Netlix pops out the "Are you still watching?" because what if they fell asleep, theyre gonna burn data if they dont stop, but this doesnt happen all the time, I think they also have a user data they get for example a user watches typically from 10pm to 1 am, even tho the session or the alert activates every two hours because they are still on their usual time of watching it doesn't pop up and doesn't interrupt, but if they pass a certain treshhold thats quite unusual like they typicaly stop watching at 1am, but the video is still playing at 2am, now the alert comes in, just my random thoughts actually. 
 
 I want to make something that have this I know it's challenging, once i finish this Im gonna try to do it, I hope this path wont bring the end of me. 
+
+MAY 27
+---
+Added role check on app layer using session cookies when user deletes if != admin cant = delete, also introduced soft deletes
+need to implement checks so deleted users cant show up on the index, if theyre deleted they cant show up on regular users

@@ -86,6 +86,7 @@ CREATE TABLE user_accounts (
     trust_level ENUM('high', 'medium', 'low') NOT NULL DEFAULT 'low',
     status ENUM('active', 'suspended', 'pending') NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (department_id) REFERENCES departments(department_id) ON DELETE SET NULL
 );
 

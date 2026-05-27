@@ -82,10 +82,19 @@ def search():
 #delete route, note that a route is like a function
 @app.route("/delete/<int:account_id>", methods=["POST"])
 def delete_user(account_id):
+
+    if session.get("role_name") != "admin":
+        return "Unauthorized: You do not have permission to perform this action.", 403
+
     connection = get_connection()
     try:
-        with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM user_accounts WHERE account_id = %s ", (account_id,))
+        with connection.cursor() as cursor: #made delete only update to introduce soft deletes
+            cursor.execute(
+                "UPDATE user_accounts "
+                "SET is_deleted = TRUE "
+                "WHERE account_id = %s ", 
+                (account_id,)
+            )
 
         connection.commit()
 

@@ -8,6 +8,8 @@ Added
 ---
 - Documents table displayed on home route — all authenticated users can view all documents
 - Added a add document route that adds/creates new documents
+- Added soft deletes, added column is_deleted BOOLEAN DEFAULT false
+- Added a application layer session role check if role_name != admin = cant delete
 
 Known issues
 ---
