@@ -69,3 +69,8 @@ MAY 27
 ---
 Added role check on app layer using session cookies when user deletes if != admin cant = delete, also introduced soft deletes
 need to implement checks so deleted users cant show up on the index, if theyre deleted they cant show up on regular users
+- also need to update queries and decide what uses is_deleted TRUE or FALSE, normal users cant and shouldnt see deleted users, only certain people. how do I enforce authorization once, correctly, and everywhere reliably?
+
+MAY 28 
+---
+added input validation on registration route, doesnt have any indicator if registration failed or completed, need to update and work on

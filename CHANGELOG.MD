@@ -10,11 +10,13 @@ Added
 - Added a add document route that adds/creates new documents
 - Added soft deletes, added column is_deleted BOOLEAN DEFAULT false
 - Added a application layer session role check if role_name != admin = cant delete
+- Added whitelisting a-z A-Z 0-9 _ using regex
 
 Known issues
 ---
 - Documents visible to all authenticated users regardless of role, department, or clearance level
 - Anyone can make documents, regarding role and attribute
+- Registration route doesnt show if transaction is completed/broken, need feedback
 
 ## 1.0.0 — 2026-05-25 — MVP
 

@@ -1,4 +1,5 @@
 import os
+import re #for regex expressions
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, session, flash, url_for
 from werkzeug.security import generate_password_hash #added scrypt import
@@ -107,6 +108,7 @@ def delete_user(account_id):
         connection.close()
 
     return redirect("/")
+    #need to a
 
 @app.route("/add", methods = ["GET", "POST"])
 def add():
@@ -207,6 +209,18 @@ def register():
         email = request.form["email"]
         username = request.form["username"]
         password = request.form["password"]
+
+        if "@" not in email or "." not in email.split("@")[-1]:
+            flash("Please enter a valid email address.", "error")
+            return render_template("register.html")
+
+        if not re.match(r"^[a-zA-Z0-9_]+$", username): #whitelisting a-z and capital A-Z 0-9 and underscores
+            flash("Username can only contain letters, numbers, and underscores.", "error")
+            return render_template("register.html")
+
+        if len(password) < 8:
+            flash("Password must be at least 8 characters long.", "error")
+            return render_template("register.html")
         
         password_hash = generate_password_hash(password) # we use scrypt here and hash teh pass before inserting onto database
 
@@ -250,12 +264,13 @@ def register():
                 )
 
             connection.commit()
-
+            flash("Registration Success! You can now log in.", "success")
             return redirect("/login")
 
         except pymysql.MySQLError as e:
             connection.rollback()
             print(f"Database error: {e}")
+            flash("Registration Failed: Database error occurred.", "danger")
             return "Registration failed.", 500
 
         finally:
