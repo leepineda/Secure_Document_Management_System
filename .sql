@@ -139,3 +139,6 @@ CREATE TABLE security_audit_logs ( -- append only, no altering data only enter
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (account_id) REFERENCES user_accounts(account_id) ON DELETE SET NULL
 ); 
+
+ALTER TABLE user_accounts ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE documents ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE;

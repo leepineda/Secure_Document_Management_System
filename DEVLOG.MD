@@ -74,3 +74,30 @@ need to implement checks so deleted users cant show up on the index, if theyre d
 MAY 28 
 ---
 added input validation on registration route, doesnt have any indicator if registration failed or completed, need to update and work on
+
+MAY 29
+---
+## Learned:
+
+- Learned that flash messages are global so we categorize them so they don't leak on other routes.
+- Learned to store role sessions on login route, we select it from the database and stores the role and assigns to default if someone doesnt have a role so it acts as a fallback.
+- Learned to use session.clear() at first i was doing session.pop() due to this i had to add the account_id and the role_name pop() so i used the session.clear to clear everything in one go.
+
+## Added:
+
+- Role store in sessions when logging in 
+- Added in the logout to pop out the role name (made session.clear())
+- Error messages showing correctly 
+- Login session check on Search route
+- Home route now doesn't display deleted accounts/documents
+- Last logged in added on user_credentials
+
+
+## Problems encountered:
+
+- Flash message on home route leaking to registration
+- Fix: removed the flash since if a user isnt on session they are automatically redirected to the login route
+
+## Need fixing
+
+- Login route uses huge if-else and security_logs don't log login attempts

@@ -6,19 +6,25 @@ Format: Added / Changed / Fixed / Removed / Security / Known Issues
 ## 1.0.1
 Added
 ---
-- Documents table displayed on home route — all authenticated users can view all documents
-- Added a add document route that adds/creates new documents
-- Added soft deletes, added column is_deleted BOOLEAN DEFAULT false
-- Added a application layer session role check if role_name != admin = cant delete
-- Added whitelisting a-z A-Z 0-9 _ using regex
+- Documents table on home route — all authenticated users can view all documents
+- Add document route for creating new documents
+- Soft deletes via is_deleted BOOLEAN DEFAULT FALSE both user_accounts and documents
+- Application-layer role check on delete — non-admins receive 403
+- Input whitelisting on username via regex (a-z, A-Z, 0-9, _)
+- Role stored in session on login, cleared on logout
+- Registration feedback — flash messages on success and error
+- Login session check added on search route 
+- All routes now all have login checks 
+- Removed visibility of deleted users using WHERE is_deleted = FALSE
+- Last logged in added on user_credentials / UPDATE
 
 Known issues
 ---
 - Documents visible to all authenticated users regardless of role, department, or clearance level
 - Anyone can make documents, regarding role and attribute
-- Registration route doesnt show if transaction is completed/broken, need feedback
+- Security logs for now doesn't log login attempts only registration
 
-## 1.0.0 — 2026-05-25 — MVP
+## 1.0.0 — 2026-05-25 — MVP 
 
 Added
 ---
@@ -123,6 +129,7 @@ Changed
 Security
 ---
 - Parameterized queries on all inserts
+- Created new user - not using root user anymore
 
 Known Issues
 ---
@@ -130,7 +137,7 @@ Known Issues
 - Root MySQL user still in use
 - No input validation
 
-### 0.1.0 Initial
+## 0.1.0 Initial
 
 Added
 ---

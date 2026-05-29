@@ -4,6 +4,20 @@
 <body>
 
     <h1>Register User</h1>
+            <style>
+            .error { color: red; }
+            .success { color: green; }
+            .warning { color: orange; }
+            </style>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <p class="{{ category }}">{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
         <form method = "POST" action = "/register">
             <label>Enter username: </label>
             <input type="text" name="username" required> <br> 

@@ -31,8 +31,7 @@ def get_connection():
 @app.route("/")
 def home():
 
-    if 'account_id' not in session:
-        flash("You must be logged in to view this page.")
+    if 'account_id' not in session: #removed the flash since it doesnt show it and also leaks the flash message to the register function and also its gonna get redirected if they arent in session
         return redirect(url_for("login"))
 
     current_user_id = session['account_id'] #if they are logged in take their data
@@ -41,10 +40,10 @@ def home():
 
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM user_accounts ")
+            cursor.execute("SELECT * FROM user_accounts WHERE is_deleted = FALSE")
             user_accounts = cursor.fetchall()
 
-            cursor.execute("SELECT * FROM documents")
+            cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE")
             documents = cursor.fetchall()
         
     except Exception as e:
@@ -59,6 +58,11 @@ def home():
 #add a search route sql syntax still
 @app.route("/search")
 def search():
+
+    if "account_id" not in session:
+        flash("You must be logged in to add a document.")
+        return redirect(url_for("login"))
+
     query = request.args.get("q", "")   # reads ?q=Alice from the URL
     connection = get_connection()
     results = []
@@ -176,13 +180,25 @@ def login():
                 cursor.execute(sql, (username,))
                 user = cursor.fetchone()
 
-                if user and check_password_hash(user["password_hash"], password):
-                    
-                    if user["status"] == "active":
-                        session["account_id"] = user["account_id"]
-                        return redirect(url_for("home"))
+                if user and check_password_hash(user["password_hash"], password) and user["status"] == "active":
+                    account_id = user["account_id"] #added a active user check and store on session
+                    #added a block that selects the role_name from database and saves it on the session
+                    cursor.execute(
+                            """
+                            SELECT r.role_name FROM user_roles ur
+                            JOIN roles r ON ur.role_id = r.role_id
+                            WHERE ur.account_id = %s
+                            """,
+                            (user["account_id"],)
+                        )
+                    role = cursor.fetchone()
+                    session["account_id"] = account_id
+                    session["role_name"] = role["role_name"] if role else "user"
+
+                    #added timestamp for last login in user_credentials
+                    cursor.execute("UPDATE user_credentials SET last_login = NOW() WHERE account_id = %s", (account_id,))
                         
-                    elif user["status"] == "suspended":
+                    if user["status"] == "suspended":
                         flash("This account has been suspended. Please contact support.")
                         return redirect(url_for("login"))
                         
@@ -280,7 +296,7 @@ def register():
 
 @app.route("/logout")
 def logout():
-    session.pop('account_id', None) #remove the session from acc id
+    session.clear() # added this instead of adding every attribute stored one by one
     
     flash("You have been successfully logged out.")
     
