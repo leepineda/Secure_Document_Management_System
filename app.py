@@ -35,15 +35,25 @@ def home():
         return redirect(url_for("login"))
 
     current_user_id = session['account_id'] #if they are logged in take their data
-    #we added this block to fetch data from the users table
+    user_role = session["role_name"]
     connection = get_connection()
-
+    
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM user_accounts WHERE is_deleted = FALSE")
             user_accounts = cursor.fetchall()
 
-            cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE")
+            documents = []
+
+            if user_role == "admin":
+                cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE")
+
+            elif user_role == "moderator":
+                cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE AND clearance_required IN ('public', 'internal')")
+            
+            elif user_role == "user":
+                cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE AND clearance_required IN 'public'")
+
             documents = cursor.fetchall()
         
     except Exception as e:
@@ -56,7 +66,7 @@ def home():
     return render_template("index.html", user_accounts=user_accounts, documents=documents)
 
 #add a search route sql syntax still
-@app.route("/search")
+@app.route("/search") 
 def search():
 
     if "account_id" not in session:
@@ -84,7 +94,7 @@ def search():
 
     return render_template("search.html", results=results, query=query)
 
-#delete route, note that a route is like a function
+#delete
 @app.route("/delete/<int:account_id>", methods=["POST"])
 def delete_user(account_id):
 
@@ -112,7 +122,7 @@ def delete_user(account_id):
         connection.close()
 
     return redirect("/")
-    #need to a
+
 
 @app.route("/add", methods = ["GET", "POST"])
 def add():
@@ -160,7 +170,7 @@ def add():
 
     return render_template("add.html")
 
-@app.route("/login", methods = ["GET", "POST"])
+@app.route("/login", methods = ["GET", "POST"]) 
 def login():
 
     if request.method == "POST":
@@ -169,7 +179,7 @@ def login():
     
         connection = get_connection()
         try:
-            with connection.cursor() as cursor: #removed the filter status and added messages
+            with connection.cursor() as cursor: 
                 sql = """
                     SELECT ua.account_id, ua.status, uc.password_hash 
                     FROM user_accounts ua 
@@ -180,38 +190,57 @@ def login():
                 cursor.execute(sql, (username,))
                 user = cursor.fetchone()
 
-                if user and check_password_hash(user["password_hash"], password) and user["status"] == "active":
-                    account_id = user["account_id"] #added a active user check and store on session
-                    #added a block that selects the role_name from database and saves it on the session
-                    cursor.execute(
-                            """
-                            SELECT r.role_name FROM user_roles ur
-                            JOIN roles r ON ur.role_id = r.role_id
-                            WHERE ur.account_id = %s
-                            """,
-                            (user["account_id"],)
-                        )
-                    role = cursor.fetchone()
-                    session["account_id"] = account_id
-                    session["role_name"] = role["role_name"] if role else "user"
-
-                    #added timestamp for last login in user_credentials
-                    cursor.execute("UPDATE user_credentials SET last_login = NOW() WHERE account_id = %s", (account_id,))
-                        
-                    if user["status"] == "suspended":
-                        flash("This account has been suspended. Please contact support.")
-                        return redirect(url_for("login"))
-                        
-                    elif user["status"] == "pending":
-                        flash("Your account registration is still pending approval.")
-                        return redirect(url_for("login"))
-                        
-                    else:
-                        flash("Account status abnormal. Access denied.")
-                        return redirect(url_for("login"))
-                else:
-                    flash("Invalid username or password.")
+                if not user or not check_password_hash(user["password_hash"], password):
+                    flash("Invalid credentials.", "error")
+                    return redirect(url_for("login")) # check if user exists and password correct
+                    
+                # only after if match we check status
+                if user["status"] == "suspended":
+                    flash("This account has been suspended. Please contact support.", "error")
                     return redirect(url_for("login"))
+
+                elif user["status"] == "pending":
+                    flash("Your account registration is still pending approval.", "error")
+                    return redirect(url_for("login"))
+
+                elif user["status"] != "active":  #if ever the status gets tampered and not on the status ENUM
+                    flash("Account status abnormal. Access denied.", "error")
+                    return redirect(url_for("login"))
+
+                account_id = user["account_id"] #get account_id and execute SQL
+
+                cursor.execute(
+                    """
+                    SELECT r.role_name FROM user_roles ur
+                    JOIN roles r ON ur.role_id = r.role_id
+                    WHERE ur.account_id = %s
+                    """,
+                    (account_id,)
+                )
+                role = cursor.fetchone() #returns a dictionary of role_name and the value and if its not found its role = none
+
+                # store account identity and role in session for use across routes 
+                session["account_id"] = account_id #assigns account_id = account_id to use in sql
+                session["role_name"] = role["role_name"] if role else "user" #assigns role name and if no role default to user
+                
+                cursor.execute(
+                    "UPDATE user_credentials SET last_login = NOW() WHERE account_id = %s",
+                    (account_id,)
+                )
+                connection.commit() 
+
+                flash("Logged in Successfully", "success")
+                return redirect(url_for("home")
+                )
+        except Exception as e:  
+            print(f"Database error: {e}")
+            flash("An error occurred during login. Please try again.", "danger")
+            try:
+                connection.rollback()
+            except:
+                pass
+            return redirect(url_for("login"))
+
         finally:
             connection.close()
 
@@ -245,9 +274,9 @@ def register():
             with connection.cursor() as cursor:
                 cursor.execute(
                     "INSERT INTO user_accounts " #user registers here
-                    "(email, username) "
-                    "VALUES (%s, %s) ",
-                    (email, username)
+                    "(email, username, status) "
+                    "VALUES (%s, %s, %s) ",
+                    (email, username, 1) #also
                 )
 
                 account_id = cursor.lastrowid
@@ -287,7 +316,7 @@ def register():
             connection.rollback()
             print(f"Database error: {e}")
             flash("Registration Failed: Database error occurred.", "danger")
-            return "Registration failed.", 500
+            return redirect(url_for("register")) #changed to redirect on register not just white canvas
 
         finally:
             connection.close()
@@ -298,7 +327,7 @@ def register():
 def logout():
     session.clear() # added this instead of adding every attribute stored one by one
     
-    flash("You have been successfully logged out.")
+    flash("You have been successfully logged out.", "success")
     
     return redirect(url_for("login"))
 

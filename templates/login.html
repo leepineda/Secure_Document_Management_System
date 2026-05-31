@@ -6,6 +6,20 @@
 <body>
     <h2>Login Page</h2>
 
+    <style>
+        .error { color: red; }
+        .success { color: green; }
+        .danger { color: red; }
+    </style>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            {% if category in ["error", "success", "danger"] %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endif %}
+        {% endfor %}
+    {% endwith %}
+
     <form action="/login" method="POST">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required autocomplete="username">

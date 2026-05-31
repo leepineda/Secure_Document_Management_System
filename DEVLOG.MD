@@ -101,3 +101,46 @@ MAY 29
 ## Need fixing
 
 - Login route uses huge if-else and security_logs don't log login attempts
+
+MAY 31 
+---
+users can only access public files, moderators can access internal, admin can access confidential and top secret
+I missed a lot of things, inverted login flow, flash messages still leaking, undefined variables, typos, connection commits missing, i saw some people use SAST tools and I think it wouldve helped me catch some of this errors, but some errors did need human review, the old login route is syntax correct but the logic is inverted. Also still learning proper documentation. I cannot be missing anything if it comes to security, that will be a nightmare so I'm gonna try to use tools for this
+
+
+## Learned:
+- Learned to always check logic of the routes/functions and how it always moves
+- Learned to reject early, succeed late
+- Learned to always handle every failure case first, success path is always last and unblocked
+- Learned that some code are dead if the preliminary checks dont even let them execute
+- Learned that Flask flash messages persist in the session until get_flashed_messages() is called, which clears them, if a page never calls it, they leak to the next page that does like my register route
+- Learned that Url for uses function names, and not routes
+- Learned about SAST, DAST, GitHub Advanced Security Bandit, Semgrep, etc... tools that let you help catch errors on codes, vulnerabilities, without manually looking for them
+- Learned that ENUM columns take strings not integers,  different from BOOLEAN/TINYINT
+- Learned that changelogs are permanent records, known issues move to fixed, never deleted
+- Learned what CSRF is and why POST routes are vulnerable without tokens
+
+## Problems encountered
+- Inverted login, checks happen AFTER login
+- User_role not assigned on session
+- Login always redirected back to login because the path was blocked by the inverted status checks
+- User checks suspended and pending never executes because of the status = "active"
+- Last login always executes even if the login fails
+- Flash messages on register route
+- get_flashed_messages() called twice in register.html, second call always returned empty but was leaking because of the uncalled login flash messages
+
+## Added:
+- Flash messages on login
+- Flash message categories
+- Added checks on roles and what document they can access
+- Added user_role assignment 
+
+## Changed:
+- Overhauled the login route to 
+ check if user = exists, password = exists
+ check status, suspended, pending, active
+ if active select user
+ select role
+ add session for role and user
+ updated last login 
+- updated sql to default to "active" when registering

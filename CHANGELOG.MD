@@ -1,7 +1,18 @@
 Changelog
 
 All notable changes to this project are documented here.
-Format: Added / Changed / Fixed / Removed / Security / Known Issues
+Format: Added / Changed / Fixed / Removed / Security / Known Issues / Planned
+
+## 1.0.2
+
+Planned
+---
+- Add CSRF protection
+- Add rate limiting
+- Restrict document creation by role
+- Add login attempt logging to security_audit_logs
+- Integrate SAST, DAST, etc... tools
+
 
 ## 1.0.1
 Added
@@ -17,12 +28,23 @@ Added
 - All routes now all have login checks 
 - Removed visibility of deleted users using WHERE is_deleted = FALSE
 - Last logged in added on user_credentials / UPDATE
+- Documents now have role and clearance check
+- Documents = [] fallback in home route, prevents crash if role = unrecognized
+
+Fixed
+---
+- Fixed register error handler, was returning raw string "Registration failed." instead of redirecting
+- Fixed user_role, now correctly fetched from session.get("role_name")
+- Fixed soft deletes now only updates is_deleted BOOLEAN
 
 Known issues
 ---
 - Documents visible to all authenticated users regardless of role, department, or clearance level
 - Anyone can make documents, regarding role and attribute
 - Security logs for now doesn't log login attempts only registration
+- No CSRF protection on POST routes CSRF (Cross Site Request Forgery)
+- SELECT * still used a lot
+- No rate limiting 
 
 ## 1.0.0 — 2026-05-25 — MVP 
 

@@ -142,3 +142,7 @@ CREATE TABLE security_audit_logs ( -- append only, no altering data only enter
 
 ALTER TABLE user_accounts ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE documents ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE user_accounts 
+MODIFY COLUMN status ENUM('active', 'suspended', 'pending') 
+DEFAULT 'active';
