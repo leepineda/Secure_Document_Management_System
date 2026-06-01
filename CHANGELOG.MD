@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 Format: Added / Changed / Fixed / Removed / Security / Known Issues / Planned
 
 ## 1.0.2
+Added
+---
+- Added CSRF protection using Flask WTF\
+- Added csrf token on state changing methods e.g POST method
+
+Fixed
+---
+- CSRF protection on destructive routes
+
+Known Issues
+---
 
 Planned
 ---
@@ -12,7 +23,6 @@ Planned
 - Restrict document creation by role
 - Add login attempt logging to security_audit_logs
 - Integrate SAST, DAST, etc... tools
-
 
 ## 1.0.1
 Added

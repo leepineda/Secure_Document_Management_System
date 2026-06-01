@@ -5,12 +5,15 @@ from flask import Flask, render_template, request, redirect, session, flash, url
 from werkzeug.security import generate_password_hash #added scrypt import
 from werkzeug.security import check_password_hash #for checking hash
 import pymysql
+from flask_wtf.csrf import CSRFProtect #CSRF protection
 
 load_dotenv()   # reads .env and puts values into os.environment
 
 app = Flask(__name__)
 
 app.secret_key = os.getenv("SECRET_KEY")
+
+csrf = CSRFProtect(app)
 
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True, 
@@ -52,7 +55,7 @@ def home():
                 cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE AND clearance_required IN ('public', 'internal')")
             
             elif user_role == "user":
-                cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE AND clearance_required IN 'public'")
+                cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE AND clearance_required IN ('public')")
 
             documents = cursor.fetchall()
         

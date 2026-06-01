@@ -144,3 +144,20 @@ I missed a lot of things, inverted login flow, flash messages still leaking, und
  add session for role and user
  updated last login 
 - updated sql to default to "active" when registering
+
+JUNE 1
+---
+added CSRF protection using Flask WTF (pip install Flask-WTF), it is actually easy to implement, just an import and updating the html files. Also we don't put a csrf check on GET routes only POST, PUT, DELETE, state changing or data manipulating methods only
+
+Also thought about doing rate  limiting by adding an attribute on user_accounts to have login_attempts and lockout_until, but i wont a hacker just use multiple devices to fire? if they use multiple accounts and each only fire 1 request per IP Address the attempts just update to 1 per request and never hits the lockout, lockout is good if they try to brute force an account like the admin, or a specific user since every IP gets logged in the login_attempts but there's still something missing
+
+I also still need to add better security logs and proper authorization on creating documents since everyone can create a document without any role checks
+
+I also still need to clean the code and architecture, so much things could be improved like the role checks should just be decorators, id keep that all in mind
+
+## Learned:
+- CSRF Protection implementation
+- CSRF is mainly used for data manipulating methods like POST, PUT, DELETE etc... and not GET methods
+
+## Added:
+- csrf token checks on every html/files

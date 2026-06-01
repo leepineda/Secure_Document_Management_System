@@ -6,6 +6,7 @@
 
     <h2>Add New Document</h2>
     <form action="/add" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         
         <p>
             <label for="title">Document Title *</label><br>
