@@ -161,3 +161,19 @@ I also still need to clean the code and architecture, so much things could be im
 
 ## Added:
 - csrf token checks on every html/files
+
+JUNE 2
+---
+Altered my user_accounts table to have login_attempts and lockout_until
+This solves two things login attempts we check it so brute forcing one password we activate lockout_until
+and lockout_until, on repeated guesses increases on time e.g 5mins -> 10 mins etc...
+
+Wow a login is actually complicated, we need to update things like sessions in it, also clear sessions, add rate limiting and check status, update attempts, and the way the login flows is really important, we only do the most important things after they passed all the checks and even then we clear the session and assign a new one I thought logins are just checking if user exists and password match but no, it seems more complicated than I thought man, also more problems like this thing i implemented doesn't solve if the attacker uses 1000 different ip addresses, also lockouts are exponential right? on cellphones if you repeatedly try to unlock a phone 1 minute turns into 3 and 5 +++,
+
+man now i know why everyone uses flask-login, or just use the framework for login and never do this manually lol
+
+## Learned:
+- Login's are not as easy as it sounds
+
+# Added:
+- login_attempts and lockout_until attributes on user_accounts

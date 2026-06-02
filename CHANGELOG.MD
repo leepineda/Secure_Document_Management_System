@@ -8,10 +8,13 @@ Added
 ---
 - Added CSRF protection using Flask WTF\
 - Added csrf token on state changing methods e.g POST method
+- Added login_attempt and lockout_until attributes on user_accounts table
+- Added a simple rate limiting lockout + login attempts for one account brute forcing
 
 Fixed
 ---
 - CSRF protection on destructive routes
+- 
 
 Known Issues
 ---

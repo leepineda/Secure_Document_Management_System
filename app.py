@@ -184,7 +184,7 @@ def login():
         try:
             with connection.cursor() as cursor: 
                 sql = """
-                    SELECT ua.account_id, ua.status, uc.password_hash 
+                    SELECT ua.account_id, ua.status, uc.password_hash, ua.login_attempts, ua.lockout_until
                     FROM user_accounts ua 
                     JOIN user_credentials uc ON ua.account_id = uc.account_id 
                     WHERE ua.username = %s
@@ -193,9 +193,27 @@ def login():
                 cursor.execute(sql, (username,))
                 user = cursor.fetchone()
 
-                if not user or not check_password_hash(user["password_hash"], password):
+                if not user:
+                    flash('Invalid credentials.', 'error')
+                    return redirect(url_for('login'))
+
+                if user ["lockout_until"] and datetime.now() < user["lockout_until"]:
                     flash("Invalid credentials.", "error")
-                    return redirect(url_for("login")) # check if user exists and password correct
+                    return redirect(url_for("login"))
+
+
+                if not check_password_hash(user["password_hash"], password):
+                    new_attempts = user["login_attempts"] + 1
+                    lockout_until = get_lockout_duration(new_attempts)
+
+                    cursor.execute(
+                    "UPDATE user_accounts SET login_attempts = %s, lockout_until = %s WHERE account_id = %s",
+                    (new_attempts, lockout_until, user["account_id"])
+                    )
+                    connection.commit()
+
+                    flash("Invalid credentials.", "error")
+                    return redirect(url_for("login"))
                     
                 # only after if match we check status
                 if user["status"] == "suspended":
@@ -212,6 +230,18 @@ def login():
 
                 account_id = user["account_id"] #get account_id and execute SQL
 
+                #if everythings successfull reset login_attempts and lockout_until
+                cursor.execute(
+                "UPDATE user_accounts SET login_attempts = 0, lockout_until = NULL WHERE account_id = %s",
+                (user['account_id'],)
+                )
+
+                cursor.execute(
+                    "UPDATE user_credentials SET last_login = NOW() WHERE account_id = %s",
+                    (account_id,)
+                )
+                connection.commit()
+
                 cursor.execute(
                     """
                     SELECT r.role_name FROM user_roles ur
@@ -221,20 +251,17 @@ def login():
                     (account_id,)
                 )
                 role = cursor.fetchone() #returns a dictionary of role_name and the value and if its not found its role = none
-
-                # store account identity and role in session for use across routes 
-                session["account_id"] = account_id #assigns account_id = account_id to use in sql
-                session["role_name"] = role["role_name"] if role else "user" #assigns role name and if no role default to user
                 
-                cursor.execute(
-                    "UPDATE user_credentials SET last_login = NOW() WHERE account_id = %s",
-                    (account_id,)
-                )
-                connection.commit() 
+                session.clear() #clear any remaining session and make a new one
+                # store account identity and role in session for use across routes 
 
+                session["account_id"] = account_id
+                session["role_name"] = role["role_name"] if role else "user"
+                
                 flash("Logged in Successfully", "success")
                 return redirect(url_for("home")
                 )
+
         except Exception as e:  
             print(f"Database error: {e}")
             flash("An error occurred during login. Please try again.", "danger")

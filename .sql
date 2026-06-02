@@ -146,3 +146,6 @@ ALTER TABLE documents ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE user_accounts 
 MODIFY COLUMN status ENUM('active', 'suspended', 'pending') 
 DEFAULT 'active';
+
+ALTER TABLE user_accounts ADD COLUMN login_attempts INT DEFAULT 0;
+ALTER TABLE user_accounts  ADD COLUMN lockout_until DATETIME DEFAULT NULL;
