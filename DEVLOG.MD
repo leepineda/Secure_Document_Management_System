@@ -177,3 +177,25 @@ man now i know why everyone uses flask-login, or just use the framework for logi
 
 # Added:
 - login_attempts and lockout_until attributes on user_accounts
+
+<details>
+<summary>JUNE 3 — Login Security & DB Hardening</summary>
+---
+Encountered a logic problem in the login route, instead of giving a fallback role when none is found, we now reject and redirect. Role assignment happens at registration, so a missing role means something broke or was bypassed on the system.
+
+Also explored database security layering, limiting the app DB user to SELECT, INSERT, UPDATE only; restricting the audit log table to INSERT only. Thought through destructive operations like hard deletes, stored procedures help, but if the public app itself is compromised, a solution I think wold be good is a separate app that have a db user that has DELETE privileges like an admin, so the regular db user and the db user with more priviledge is also seperate.
+
+My Professor introduced this concept, but building it myself is where I actually encountered how it's used.
+
+# Learned:
+- Learned that instead of having grace when an unexpected problem occurs, reject and redirect them, giving them a fallback is trusting them. If the system manages those things and if someone breaks it its worth keeping eye on, for example if someone enters without a role and try to login, that is an unexpected variable, we dont give them grace
+
+- Learned that Security Logs are critically important, it is the first Incident Response baseline, if you dont have logs, you dont know what happened and by who, when, and what. Also append only is critical, you dont want someone inserting fake logs thats dangerous. Also logs need to also have different clusters, instead of a big security_logs table, we split them up to registration_logs, login_logs, activity_logs... good to keep in mind but that's for another day
+
+- Also learned that schema decisions on the very first day is critical, changing a live table is gonna cost downtimes.
+
+- Also learned about database migration, and database optimization.
+
+- Also learned that application layer role checks and database layer privilege restrictions are separate concerns that reinforce each other,  the DB user having no DELETE isn't about restricting admin users, it's about limiting the damage if the application is compromised.
+
+</details>

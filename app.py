@@ -228,12 +228,12 @@ def login():
                     flash("Account status abnormal. Access denied.", "error")
                     return redirect(url_for("login"))
 
-                account_id = user["account_id"] #get account_id and execute SQL
+                account_id = user["account_id"]
 
                 #if everythings successfull reset login_attempts and lockout_until
                 cursor.execute(
                 "UPDATE user_accounts SET login_attempts = 0, lockout_until = NULL WHERE account_id = %s",
-                (user['account_id'],)
+                (account_id,)
                 )
 
                 cursor.execute(
@@ -251,12 +251,14 @@ def login():
                     (account_id,)
                 )
                 role = cursor.fetchone() #returns a dictionary of role_name and the value and if its not found its role = none
+                #if role is none it redirects to the login
+                if not role:
+                    flash("Account configuration error. Please contact support.", "error")
+                    return redirect(url_for("login"))
                 
                 session.clear() #clear any remaining session and make a new one
-                # store account identity and role in session for use across routes 
-
                 session["account_id"] = account_id
-                session["role_name"] = role["role_name"] if role else "user"
+                session["role_name"] = role["role_name"]
                 
                 flash("Logged in Successfully", "success")
                 return redirect(url_for("home")

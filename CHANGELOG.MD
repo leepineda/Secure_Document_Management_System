@@ -14,10 +14,12 @@ Added
 Fixed
 ---
 - CSRF protection on destructive routes
-- 
+- Fixed login, instead of fallback user role when it detects a null role, we throw an error instead
 
-Known Issues
+Known Issues / Need fixing
 ---
+- No proper logging
+- using except pass:
 
 Planned
 ---
