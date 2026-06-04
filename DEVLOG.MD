@@ -179,8 +179,10 @@ man now i know why everyone uses flask-login, or just use the framework for logi
 - login_attempts and lockout_until attributes on user_accounts
 
 <details>
-<summary>JUNE 3 — Login Security & DB Hardening</summary>
----
+<summary> JUNE 3 — Login Security & DB Hardening</summary>
+
+## JUNE 3 — Login Security & DB Hardening
+
 Encountered a logic problem in the login route, instead of giving a fallback role when none is found, we now reject and redirect. Role assignment happens at registration, so a missing role means something broke or was bypassed on the system.
 
 Also explored database security layering, limiting the app DB user to SELECT, INSERT, UPDATE only; restricting the audit log table to INSERT only. Thought through destructive operations like hard deletes, stored procedures help, but if the public app itself is compromised, a solution I think wold be good is a separate app that have a db user that has DELETE privileges like an admin, so the regular db user and the db user with more priviledge is also seperate.
@@ -197,5 +199,10 @@ My Professor introduced this concept, but building it myself is where I actually
 - Also learned about database migration, and database optimization.
 
 - Also learned that application layer role checks and database layer privilege restrictions are separate concerns that reinforce each other,  the DB user having no DELETE isn't about restricting admin users, it's about limiting the damage if the application is compromised.
+
+</details>
+
+<details> 
+<summary> JUNE 4 2026 Skipped</summary>
 
 </details>
