@@ -218,11 +218,26 @@ def login():
                 # only after if match we check status
                 if user["status"] == "suspended":
                     flash("This account has been suspended. Please contact support.", "error")
-                    return redirect(url_for("login"))
+
+                    cursor.execute(
+                    "INSERT INTO security_audit_logs "
+                    "(account_id, action_performed, resource_affected, ip_address, status) "
+                    "VALUES (%s, %s, %s, %s, %s) ",
+                    (
+                        account_id,
+                        "Login Suspended Account",
+                        "user_accounts",
+                        request.remote_addr,
+                        "DENIED"
+                    )
+                )
+                return redirect(url_for("login"))
 
                 elif user["status"] == "pending":
                     flash("Your account registration is still pending approval.", "error")
                     return redirect(url_for("login"))
+
+                    
 
                 elif user["status"] != "active":  #if ever the status gets tampered and not on the status ENUM
                     flash("Account status abnormal. Access denied.", "error")
@@ -255,12 +270,41 @@ def login():
                 if not role:
                     flash("Account configuration error. Please contact support.", "error")
                     return redirect(url_for("login"))
+
+                    cursor.execute(
+                    "INSERT INTO security_audit_logs "
+                    "(account_id, action_performed, resource_affected, ip_address, status) "
+                    "VALUES (%s, %s, %s, %s, %s) ",
+                    (
+                        account_id,
+                        "Login Role Not Found",
+                        "user_accounts",
+                        request.remote_addr,
+                        "ERROR"
+                    )
+                )
                 
                 session.clear() #clear any remaining session and make a new one
                 session["account_id"] = account_id
                 session["role_name"] = role["role_name"]
                 
                 flash("Logged in Successfully", "success")
+
+                cursor.execute(
+                    "INSERT INTO security_audit_logs "
+                    "(account_id, action_performed, resource_affected, ip_address, status) "
+                    "VALUES (%s, %s, %s, %s, %s) ",
+                    (
+                        account_id,
+                        "Login Success",
+                        "user_accounts",
+                        request.remote_addr,
+                        "ALLOWED"
+                    )
+                )
+                
+                connection.commit()
+
                 return redirect(url_for("home")
                 )
 

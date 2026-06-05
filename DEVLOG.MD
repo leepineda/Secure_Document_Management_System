@@ -206,3 +206,12 @@ My Professor introduced this concept, but building it myself is where I actually
 <summary> JUNE 4 2026 Skipped</summary>
 
 </details>
+
+<details>
+<summary> JUNE 5 2026 </summary>
+
+## JUNE 5 Security Logs
+
+I wanted to add what's considered as the baseline of Incident Response, logs, you can't respond on something you don't have an IDEA on. Logs depending on how you build it is like the CCTV, you see who did it, what they did, and when they did it. Logs should be immutable, no one can delete it, no one can change it, it's readable, and there's no manipulation. Logs give way to Log analysis, monitoring, identification, etc...
+
+</details>

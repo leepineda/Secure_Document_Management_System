@@ -10,6 +10,7 @@ Added
 - Added csrf token on state changing methods e.g POST method
 - Added login_attempt and lockout_until attributes on user_accounts table
 - Added a simple rate limiting lockout + login attempts for one account brute forcing
+- Added logging 
 
 Fixed
 ---
@@ -20,6 +21,7 @@ Known Issues / Need fixing
 ---
 - No proper logging
 - using except pass:
+- Logs need proper indentation and flow
 
 Planned
 ---
