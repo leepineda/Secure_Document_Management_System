@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash #added scrypt import
 from werkzeug.security import check_password_hash #for checking hash
 import pymysql
 from flask_wtf.csrf import CSRFProtect #CSRF protection
+from datetime import datetime, timedelta #for lockout
 
 load_dotenv()   # reads .env and puts values into os.environment
 
@@ -173,6 +174,14 @@ def add():
 
     return render_template("add.html")
 
+def get_lockout_duration(attempts):
+    if attempts >= 10:
+        return datetime.now() + timedelta(minutes=30)
+    elif attempts >= 5:
+        return datetime.now() + timedelta(minutes=5)
+    else:
+        return None
+
 @app.route("/login", methods = ["GET", "POST"]) 
 def login():
 
@@ -197,14 +206,28 @@ def login():
                     flash('Invalid credentials.', 'error')
                     return redirect(url_for('login'))
 
-                if user ["lockout_until"] and datetime.now() < user["lockout_until"]:
+                account_id = user["account_id"]
+
+                if user["lockout_until"] and datetime.now() < user["lockout_until"]:
+                    cursor.execute(
+                        "INSERT INTO security_audit_logs "
+                        "(account_id, action_performed, resource_affected, ip_address, status) "
+                        "VALUES (%s, %s, %s, %s, %s) ",
+                        (
+                            account_id,
+                            "Login Locked Account",
+                            "user_accounts",
+                            request.remote_addr,
+                            "DENIED"
+                        )
+                    )
                     flash("Invalid credentials.", "error")
                     return redirect(url_for("login"))
 
 
                 if not check_password_hash(user["password_hash"], password):
                     new_attempts = user["login_attempts"] + 1
-                    lockout_until = get_lockout_duration(new_attempts)
+                    lockout_until = get_lockout_duration(new_attempts) if new_attempts >= 5 else None
 
                     cursor.execute(
                     "UPDATE user_accounts SET login_attempts = %s, lockout_until = %s WHERE account_id = %s",
@@ -212,38 +235,74 @@ def login():
                     )
                     connection.commit()
 
+                    cursor.execute(
+                        "INSERT INTO security_audit_logs "
+                        "(account_id, action_performed, resource_affected, ip_address, status) "
+                        "VALUES (%s, %s, %s, %s, %s) ",
+                        (
+                            account_id,
+                            "Login Wrong Credentials",
+                            "user_accounts",
+                            request.remote_addr,
+                            "DENIED"
+                        )
+                    )
+                    connection.commit()
                     flash("Invalid credentials.", "error")
                     return redirect(url_for("login"))
                     
                 # only after if match we check status
                 if user["status"] == "suspended":
-                    flash("This account has been suspended. Please contact support.", "error")
-
                     cursor.execute(
-                    "INSERT INTO security_audit_logs "
-                    "(account_id, action_performed, resource_affected, ip_address, status) "
-                    "VALUES (%s, %s, %s, %s, %s) ",
-                    (
-                        account_id,
-                        "Login Suspended Account",
-                        "user_accounts",
-                        request.remote_addr,
-                        "DENIED"
+                        "INSERT INTO security_audit_logs "
+                        "(account_id, action_performed, resource_affected, ip_address, status) "
+                        "VALUES (%s, %s, %s, %s, %s) ",
+                        (
+                            account_id,
+                            "Login Suspended Account",
+                            "user_accounts",
+                            request.remote_addr,
+                            "DENIED"
+                        )
                     )
-                )
-                return redirect(url_for("login"))
+                    connection.commit()
+                    flash("Invalid credentials.", "error")
+                    return redirect(url_for("login"))
 
                 elif user["status"] == "pending":
+                    cursor.execute(
+                        "INSERT INTO security_audit_logs "
+                        "(account_id, action_performed, resource_affected, ip_address, status) "
+                        "VALUES (%s, %s, %s, %s, %s) ",
+                        (
+                            account_id,
+                            "Login Pending Account",
+                            "user_accounts",
+                            request.remote_addr,
+                            "DENIED"
+                        )
+                    )
+                    connection.commit()
                     flash("Your account registration is still pending approval.", "error")
                     return redirect(url_for("login"))
 
-                    
-
                 elif user["status"] != "active":  #if ever the status gets tampered and not on the status ENUM
+                    cursor.execute(
+                        "INSERT INTO security_audit_logs "
+                        "(account_id, action_performed, resource_affected, ip_address, status) "
+                        "VALUES (%s, %s, %s, %s, %s) ",
+                        (
+                            account_id,
+                            "Login Non Active User",
+                            "user_accounts",
+                            request.remote_addr,
+                            "DENIED"
+                        )
+                    )
+                    connection.commit()
                     flash("Account status abnormal. Access denied.", "error")
                     return redirect(url_for("login"))
 
-                account_id = user["account_id"]
 
                 #if everythings successfull reset login_attempts and lockout_until
                 cursor.execute(
@@ -265,24 +324,25 @@ def login():
                     """,
                     (account_id,)
                 )
+
                 role = cursor.fetchone() #returns a dictionary of role_name and the value and if its not found its role = none
                 #if role is none it redirects to the login
                 if not role:
+                    cursor.execute(
+                        "INSERT INTO security_audit_logs "
+                        "(account_id, action_performed, resource_affected, ip_address, status) "
+                        "VALUES (%s, %s, %s, %s, %s) ",
+                        (
+                            account_id,
+                            "Login Role Not Found",
+                            "user_accounts",
+                            request.remote_addr,
+                            "ERROR"
+                        )
+                    )
+                    connection.commit()
                     flash("Account configuration error. Please contact support.", "error")
                     return redirect(url_for("login"))
-
-                    cursor.execute(
-                    "INSERT INTO security_audit_logs "
-                    "(account_id, action_performed, resource_affected, ip_address, status) "
-                    "VALUES (%s, %s, %s, %s, %s) ",
-                    (
-                        account_id,
-                        "Login Role Not Found",
-                        "user_accounts",
-                        request.remote_addr,
-                        "ERROR"
-                    )
-                )
                 
                 session.clear() #clear any remaining session and make a new one
                 session["account_id"] = account_id

@@ -11,11 +11,16 @@ Added
 - Added login_attempt and lockout_until attributes on user_accounts table
 - Added a simple rate limiting lockout + login attempts for one account brute forcing
 - Added logging 
+- Added Login Logs
+- Added for lockout import
+- Added get_lockout_duration function
 
 Fixed
 ---
 - CSRF protection on destructive routes
 - Fixed login, instead of fallback user role when it detects a null role, we throw an error instead
+- Fixed get_lockout_duration not defined
+- Fixed account_id not being defined at the top
 
 Known Issues / Need fixing
 ---
