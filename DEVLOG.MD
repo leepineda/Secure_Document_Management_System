@@ -226,3 +226,22 @@ I learned that doing things like pasting one by one a block of code is gonna int
 - Knowing what to log are key to a good CCTV, if the logs are messy, the information that you can extract from that data is minimal.
 
 </details>
+
+<details> 
+<summary> JUNE 7 2026</summary>
+
+## JUNE 7 Additional Logs
+
+Im contemplating whether i should add additional logs on my Registration, do I need to add more? An attack might come that guesses i dont know what its called but lets say someone knows an account, they might note them and try to attack that on the Login page no? I need to look more into that. 
+
+Also my login filters if not user and redirects back, doesn't this introduce a new problem? but what problem? both the if not user and other things say invalid credentials? I saw people say that a hacker can try to use timings? on this so they know if something has an account even tho the message says invalid creds only
+
+Okay i learned its called a Side Channel Attack i saw this video from MIT OpenCourseWare 16. Side-Channel Attacks 
+here's the link https://youtu.be/3v5Von-oNUg?si=VnMSx_aueH9j-6HH
+I need to re watch this a couple times to actually understand some concepts but it is a good thing to know, security isnt just locked in a layer, its how the system behaves huh
+Basically crytopgraphic tools like scrypt takes time, and hackers can use that time to guess if a real user exists i think this is what my login misses, it redirects immediately at the slight error on if not user so the hacker can guess if a user exists with only that information, and if it takes more time like the user is real and they check the password they also know it
+
+Wow how the system behaves can also be exploited, man I still don't know anything.
+
+I think I'm gonna watch a lot of lectures from this day onwards, and ofc also implement them
+</details>
