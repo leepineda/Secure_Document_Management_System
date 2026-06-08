@@ -244,4 +244,19 @@ Basically crytopgraphic tools like scrypt takes time, and hackers can use that t
 Wow how the system behaves can also be exploited, man I still don't know anything.
 
 I think I'm gonna watch a lot of lectures from this day onwards, and ofc also implement them
+
+even network bits can be exploited
+</details>
+
+<details>
+<summary> JUNE 8 2026</summary>
+
+## JUNE 8 2026 Privileges
+
+So as I was washing dishes, I had a thought that, first do I really need to make an INSERT query every wrong action? Isn't that what triggers are for? And also revoking privileges, isn't it too time consuming to REVOKE all delete on the TABLES? and I said Isn't that why we have user roles? BUT, what if we DIDN'T revoke the DELETE on admin, and let's say we do, but WE didn't revoke the GRANT privilege, and now he can just GRANT DELETE on user, and also modify the security_logs to be DELETE able? wouldn't it all come crashing down? 
+
+If the admin is compromised, if we don't lock him down, an ADMIN is the worst security threat we can have if we don't configure the things cleanly
+
+Unrevoked privileges are high risk vulnerabilities.
+
 </details>

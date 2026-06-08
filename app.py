@@ -16,6 +16,8 @@ app.secret_key = os.getenv("SECRET_KEY")
 
 csrf = CSRFProtect(app)
 
+DUMMY_HASH = generate_password_hash("DAHkoldpadkadpwdbadwuBUy12139@#!2373modkaojdouw---391-dad") #added this to use for anti Timing Attack
+
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True, 
     SESSION_COOKIE_SECURE=True,
@@ -203,6 +205,7 @@ def login():
                 user = cursor.fetchone()
 
                 if not user:
+                    check_password_hash(DUMMY_HASH, password) #here so even if a user doesnt exist they still check the hash so same time fot every user whether they exist or not
                     flash('Invalid credentials.', 'error')
                     return redirect(url_for('login'))
 
