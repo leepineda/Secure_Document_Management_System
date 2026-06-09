@@ -260,3 +260,15 @@ If the admin is compromised, if we don't lock him down, an ADMIN is the worst se
 Unrevoked privileges are high risk vulnerabilities.
 
 </details>
+
+<details>
+<summary> JUNE 9 2026 </summary>
+
+## JUNE 9 2026 Register Cleanup
+
+I got sidetracked again, there are still lingering issues, now I'll fix the register route to also have what login does, proper logging on registration/ failed/ duplicate.
+Critical flaw is the Log insert is on the transaction so if the transaction fails, we dont have a record so we fixed that.
+
+My registration also doesn't have a rate limiter, but because we don't have a account attached to it it's not as easy to manage, Im gonna make it just check the IP address, but then it still wouldnt stop an attacker on using 1000 different IP maybe this is where WAF and CAPTCHA is used, dont mean I cant use them both no?, Ill note it.
+
+</details>

@@ -3,6 +3,12 @@ Changelog
 All notable changes to this project are documented here.
 Format: Added / Changed / Fixed / Removed / Security / Known Issues / Planned
 
+## 1.0.3
+Added
+---
+- Added registration logs
+
+
 ## 1.0.2
 Added
 ---

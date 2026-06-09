@@ -224,6 +224,7 @@ def login():
                             "DENIED"
                         )
                     )
+                    connection.commit()
                     flash("Invalid credentials.", "error")
                     return redirect(url_for("login"))
 
@@ -433,29 +434,77 @@ def register():
                     "VALUES (%s, %s) ",
                     (account_id, 3)
                 )
-
-                cursor.execute(
-                    "INSERT INTO security_audit_logs " #make a sec log
-                    "(account_id, action_performed, resource_affected, ip_address, status) "
-                    "VALUES (%s, %s, %s, %s, %s) ",
-                    (
-                        account_id,
-                        "Account Registration",
-                        "user_accounts",
-                        request.remote_addr, #gets the ip address of the registered user
-                        "ALLOWED"
-                    )
-                )
-
             connection.commit()
+
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                            "INSERT INTO security_audit_logs "
+                            "(account_id, action_performed, resource_affected, ip_address, status) "
+                            "VALUES (%s, %s, %s, %s, %s) ",
+                            (
+                                account_id,
+                                "Account Registration",
+                                "user_accounts",
+                                request.remote_addr, 
+                                "ALLOWED"
+                            )
+                        )
+                connection.commit()
+            except Exception as e:
+                print (f"Audit log error (success): {e}")
+
             flash("Registration Success! You can now log in.", "success")
             return redirect("/login")
 
+        except pymysql.err.IntegrityError as e:
+            connection.rollback()
+
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "INSERT INTO security_audit_logs "
+                        "(account_id, action_performed, resource_affected, ip_address, status) "
+                        "VALUES (%s, %s, %s, %s, %s) ",
+                        (
+                            None,
+                            "Account Registration Failed",
+                            "user_accounts",
+                            request.remote_addr,
+                            "DENIED"
+                        )
+                    )
+                connection.commit()
+            except Exception as log_error:
+                print(f"Audit log error (duplicate): {log_error}")
+
+            flash ("Email or username is already taken.", "error")
+            return redirect(url_for("register"))
+
         except pymysql.MySQLError as e:
             connection.rollback()
+
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "INSERT INTO security_audit_logs "
+                        "(account_id, action_performed, resource_affected, ip_address, status) "
+                        "VALUES (%s, %s, %s, %s, %s) ",
+                        (
+                            None,
+                            "Account Registration Error",
+                            "user_accounts",
+                            request.remote_addr,
+                            "ERROR"
+                        )
+                    )
+                connection.commit()
+            except Exception as log_error:
+                print(f"Audit log error (db error): {log_error}")
+
             print(f"Database error: {e}")
             flash("Registration Failed: Database error occurred.", "danger")
-            return redirect(url_for("register")) #changed to redirect on register not just white canvas
+            return redirect(url_for("register"))
 
         finally:
             connection.close()
