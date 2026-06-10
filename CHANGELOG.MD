@@ -8,7 +8,6 @@ Added
 ---
 - Added registration logs
 
-
 ## 1.0.2
 Added
 ---

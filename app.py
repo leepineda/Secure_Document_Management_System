@@ -519,6 +519,12 @@ def logout():
     
     return redirect(url_for("login"))
 
+@app.route("/approve", methods = ["POST", "PUT"])
+def approve():
+    
+    if request.method == "PUT"
+
+
 #initialize the application
 if __name__ == "__main__":
     app.run(debug=False) #made false

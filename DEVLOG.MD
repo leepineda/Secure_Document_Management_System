@@ -272,3 +272,22 @@ Critical flaw is the Log insert is on the transaction so if the transaction fail
 My registration also doesn't have a rate limiter, but because we don't have a account attached to it it's not as easy to manage, Im gonna make it just check the IP address, but then it still wouldnt stop an attacker on using 1000 different IP maybe this is where WAF and CAPTCHA is used, dont mean I cant use them both no?, Ill note it.
 
 </details>
+
+<details>
+<summary> JUNE 10 2026</summary>
+
+## JUNE 10 2026 
+
+Debated whether I need an admin approval of the docs creation or not, came to conlusion I needed it. Since the system needs any user should be able to create/post things, but they need supervision. So for that we need to alter the documents to have status whether pending, approved, or not_approved, and we need to tweak some code a little like the add route to contain pending, and the filteration on the Index so only approved papers show, and only their specific confidentiality, but wait, if a user can add a document, and that document confidentiality is higher than their own like a user can only see public records whilst they create a document that is higher than what they could access. The solution I think always depends on what use case it is, do we make them not able to create documents that arent in their forte? like a user can only create public records? or do we make it so the thing they created can be seen by them even if its confidential, but cant be seen by another user if they dont have the necessary role? Hmm maybe im giving the users too much power, i think theres also an option where an admin reviews it and updates the file to have the necessary confidentiality. And also a user should never be able to assign what level of security is needed for something for that is not their repertoire.
+
+my reasoning still lacks the questions needed, a user should only be given what they need, in the first place the user doesnt decide whether something is confidential or not, thats a lapse on my understanding, i still need to break things in order to understand them.
+
+Do they need this? Who is the person who decides whether a thing is bad or not?
+
+Also this happened because I didn't design the system to solve something, i made this system as a way to showcase security and then im hit again that, you need the system how the thing works, what is the system questions.
+
+What is the purpose of this system?
+
+I still have a lot left to do, I still quite need some time to improve.
+
+</details>
