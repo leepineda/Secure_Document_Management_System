@@ -291,3 +291,12 @@ What is the purpose of this system?
 I still have a lot left to do, I still quite need some time to improve.
 
 </details>
+
+<details>
+<summary>JUNE 11 2026</summary>
+
+## JUNE 11 2026
+
+Today I just did a Q and A session and answered some questions about what are my systems, generic ones like why did I use this, why did you do this, what does this prevent, I'm stuck with Why do I clear the session before assigning a new one? and what does this prevent? I wanted to answer We clear the session first in case its tampered with e.g a CSRF attack, and make them a new session, also if theres a ongoing session that we havent cleared, it might cause problems on it, i cant pinpoint exactly what problem it is but if an existing session is on and we log them in and they enter i think thats gonna cause some problems
+
+</details>
