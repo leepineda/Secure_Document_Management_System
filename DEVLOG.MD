@@ -300,3 +300,72 @@ I still have a lot left to do, I still quite need some time to improve.
 Today I just did a Q and A session and answered some questions about what are my systems, generic ones like why did I use this, why did you do this, what does this prevent, I'm stuck with Why do I clear the session before assigning a new one? and what does this prevent? I wanted to answer We clear the session first in case its tampered with e.g a CSRF attack, and make them a new session, also if theres a ongoing session that we havent cleared, it might cause problems on it, i cant pinpoint exactly what problem it is but if an existing session is on and we log them in and they enter i think thats gonna cause some problems
 
 </details>
+
+<summary>JUNE 12 2026 </summary>
+
+## JUNE 12 2026
+
+# Learned:  Race conditions, Isolation Levels, Deadlocks, Fault tolerance, Retry Safety, Idempotency Keys
+
+- Learned about how someone can fire up two requests and both go through, or what we call a Race Condition. For this hey sql dont let anyone in ever if this transaction is still ongoing, thats the logic and its basically the same for everything.
+
+I kinda get the gist of it now, IF the query having a transaction on different IDs, like different people, thats fine, but if a user suddenly makes two requests at the same time, thats no good, one user can only get a response one a a time after the first request is done like FIFO, but that doesnt mean they cant request multiple time, it just queues
+
+So basically, you youre requesting 5 things, wait ill process this one and update it, and do that one, and until its over, we only process one thing at a time we read + update, and process the next request.
+
+The fix is SELECT FOR UPDATE inside a transaction. The lock lives at the SELECT, not the UPDATE, because that's where the race starts. By the time youre updating, the damage is already done if two reads slipped through simultaneously.
+
+BEGIN;
+SELECT balance FROM wallets WHERE user_id = 1 FOR UPDATE;
+
+UPDATE wallets SET balance = 0
+COMMIT;
+
+The second request doesn't just wait for the SELECT — it waits for the entire transaction to finish including the write. That sealed unit is what a transaction actually means. Either the whole thing happens, or none of it does. No in-between state is ever visible to anyone else.
+
+READ UNCOMMITTED
+- Can see changes that aren't saved yet.
+See everything.
+
+READ COMMITTED
+- Can only see saved changes.
+See only committed data.
+
+REPEATABLE READ
+- What you read stays the same during your transaction.
+Same read = same result.
+
+SERIALIZABLE
+- Transactions behave as if executed one after another.
+Independent transactions may still run in parallel internally.
+
+Here are some things that might happen:
+
+Dirty Read — you read data that another transaction wrote but hasn't committed yet. That transaction might rollback meaning you acted on data that never officially existed.
+
+Non-repeatable Read — you read a row, another transaction updates and commits it, you read it again inside the same transaction and get a different value.
+
+Phantom Read — you query a range (WHERE points > 0), another transaction inserts a new row that fits that range, you query again and suddenly there's a new row you didn't see before
+
+- Also learned about fault tolerance, I had a dillema when a Process contains a DB transaction and an outside step into it, for example Email. The scenario goes like this, if we have a point system/redeem for rewards, there's two things that can happen, either the Database fails, and sends the email, or the database succeeds and doesn't send an email. I was looking for a solution on something that doesn't have one, there's no correct order for this that satisfies both needs. If a user gets the email first, but the transaction on the Database failed that's an easy fix, we just try it again. But if the Database transaction got through and we dont send them an email, they might think there's an error, and they try again, now they don't have enough balance, it's deducted but not reflected.
+
+User pain is asymmetric
+- Email sent but no deduction > user tries again > recoverable
+- Deduction done but no email > user tries again > double charged = bad bad
+
+We commit the charge first and send the receipt to them.
+If the receipt doesn't go through, or an email hasnt been sent, we now handle it with retries maybe send again, IF only the side effect fails, resend confirmation, or the admin manually triggering the email, or maybe we show them that its got through the coins they have deducted, only. We also use idempotency keys here, suppose the user retries the request after a successful redemption, the system detects the existing record and returns the previous result or resends the confirmation instead of charging them again.
+
+- Learned about deadlocks where a transaction is infinitely waiting for something like Transaction B is waiting for Transaction A to complete and vice versa. This introduces the kill where we kill a transaction to make way for another one, and we pick it based on the cost, the less power/resource it needs, it will be the one who is gonna get cancelled. 
+
+- When a deadlock happens, we can try to kill it but what we do after that is what matters. A transaction rollback only handles the database transactions and not the other steps like Email Verification, Auto retry is considered good if there's idempotency or the side effects are controlled (API, Email, Notifs)
+
+- Learned about idempotency keys, idempotency keys make repeated requests produce the same result. like SMS, if we fire a request we store a key, SMS sent then the key is stored, deadlock happens, we retry now we dont send another SMS because we already fired one, it checks that so we dont duplicate, because if we dont do this and we send an SMS on the second retry now we have 2 SMS codes, one is right, one is wrong.
+
+- Sometimes there's no right answer, only tolerable failures
+- Understanding why no solution exists is itself a solution
+- Auto-retry is only safe when there are no external side effects
+- The lock lives at the SELECT, not the UPDATE
+- also it's okay to learn but implement things at their own levels
+
+I don't fully know all this concepts yet, I still need more work, I can kinda reason on this but not mastery

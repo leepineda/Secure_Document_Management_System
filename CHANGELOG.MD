@@ -8,6 +8,12 @@ Added
 ---
 - Added registration logs
 
+Planned
+---
+- Fix the pending, and add admin confidentiality check and assignment
+- Fix up SELECT
+- Fix up pass
+
 ## 1.0.2
 Added
 ---
