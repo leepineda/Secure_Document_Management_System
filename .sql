@@ -149,3 +149,7 @@ DEFAULT 'active';
 
 ALTER TABLE user_accounts ADD COLUMN login_attempts INT DEFAULT 0;
 ALTER TABLE user_accounts  ADD COLUMN lockout_until DATETIME DEFAULT NULL;
+
+ALTER TABLE documents
+MODIFY COLUMN status ENUM('approved', 'rejected', 'pending')
+DEFAULT 'pending';

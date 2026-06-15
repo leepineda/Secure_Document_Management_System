@@ -7,12 +7,18 @@ Format: Added / Changed / Fixed / Removed / Security / Known Issues / Planned
 Added
 ---
 - Added registration logs
+- Added status column on documents
+- Added status filter on Index to not show pending, and only show approved
 
 Planned
 ---
 - Fix the pending, and add admin confidentiality check and assignment
 - Fix up SELECT
 - Fix up pass
+
+Known Issues 
+- still using select
+- using except pass
 
 ## 1.0.2
 Added

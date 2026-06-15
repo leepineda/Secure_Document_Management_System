@@ -46,7 +46,7 @@ def home():
     
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM user_accounts WHERE is_deleted = FALSE")
+            cursor.execute("SELECT * FROM user_accounts WHERE is_deleted = FALSE" )
             user_accounts = cursor.fetchall()
 
             documents = []
@@ -55,10 +55,10 @@ def home():
                 cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE")
 
             elif user_role == "moderator":
-                cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE AND clearance_required IN ('public', 'internal')")
+                cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE AND clearance_required IN ('public', 'internal') AND status IN ('approved')")
             
             elif user_role == "user":
-                cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE AND clearance_required IN ('public')")
+                cursor.execute("SELECT * FROM documents WHERE is_deleted = FALSE AND clearance_required IN ('public') AND status IN ('approved')")
 
             documents = cursor.fetchall()
         
@@ -141,7 +141,6 @@ def add():
 
         title = request.form.get("title")
         content = request.form.get("content")
-        clearance_required = request.form.get("clearance_required")
 
         department_id = request.form.get("department_id")
         if department_id == "":
@@ -160,7 +159,7 @@ def add():
                     INSERT INTO documents (title, content, owner_id, department_id, clearance_required)
                     VALUES (%s, %s, %s, %s, %s)
                 """
-                cursor.execute(sql, (title, content, owner_id, department_id, clearance_required))
+                cursor.execute(sql, (title, content, owner_id, department_id, 4))
 
             connection.commit()
             flash("Document added successfully!")
@@ -519,10 +518,10 @@ def logout():
     
     return redirect(url_for("login"))
 
-@app.route("/approve", methods = ["POST", "PUT"])
-def approve():
+#@app.route("/approve", methods = ["POST", "PUT"])
+#def approve():
     
-    if request.method == "PUT"
+    #if request.method == "PUT"
 
 
 #initialize the application

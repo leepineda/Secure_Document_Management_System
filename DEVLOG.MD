@@ -368,4 +368,17 @@ If the receipt doesn't go through, or an email hasnt been sent, we now handle it
 - The lock lives at the SELECT, not the UPDATE
 - also it's okay to learn but implement things at their own levels
 
+# learned that some failures are inevitable and must be designed for TwT
+
 I don't fully know all this concepts yet, I still need more work, I can kinda reason on this but not mastery
+
+<details>
+<summary> JUNE 15 2026 </summary>
+
+## JUNE 15 2026 Document status checks, schema check
+
+Added status on documents and also modified the add route and html to not include confidentiality, also hardcoded the 3 so its always pending first when creating a docs, so also made the confidentiality always be at highest for now top_secret, and i need to change this so the owner can see it pending and also the admin to see, but other users cant see it. I need also is add an admin check page that shows all pending and update the confidentiality.
+
+I was wondering why they dont show it even tho its public then i forgot i placed status on documents and a filter on the select documents to not show any pending documents, so i updated one for checking, so now everthing works nicely, I just need to add an admin panel that shows pending docs and the core loop is complete
+
+</details>
