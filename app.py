@@ -512,16 +512,69 @@ def register():
 
 @app.route("/logout")
 def logout():
-    session.clear() # added this instead of adding every attribute stored one by one
+    session.clear() 
     
     flash("You have been successfully logged out.", "success")
     
     return redirect(url_for("login"))
 
-#@app.route("/approve", methods = ["POST", "PUT"])
-#def approve():
-    
-    #if request.method == "PUT"
+@app.route("/approve/<int:document_id>", methods=["POST"])
+def approve(document_id):
+
+    if "account_id" not in session:
+        flash("You must be logged in to perform this action.", "error")
+        return redirect(url_for("login"))
+
+    if session.get("role_name") not in ["admin"]:
+        return "Unauthorized: You do not have permission to perform this action.", 403
+
+    clearance_required = request.form.get("clearance_required")
+    if not clearance_required:
+        flash("Confidentiality level is required.", "error")
+        return redirect(url_for("home"))
+
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            # 4. Update the document status from pending to approved and change confidentiality
+            sql = """
+                UPDATE documents 
+                SET status = 'approved', clearance_required = %s 
+                WHERE document_id = %s AND status = 'pending'
+            """
+            cursor.execute(sql, (clearance_required, document_id))
+            
+            # Verify if the document was actually found and updated
+            if cursor.rowcount == 0:
+                flash("Document not found or it is already approved.", "error")
+                return redirect(url_for("home"))
+
+            # 5. Log the successful action to your security audit logs
+            audit_sql = """
+                INSERT INTO security_audit_logs 
+                (account_id, action_performed, resource_affected, ip_address, status) 
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            cursor.execute(audit_sql, (
+                session["account_id"],
+                f"Approved Document ID {document_id} with clearance '{clearance_required}'",
+                "documents",
+                request.remote_addr,
+                "ALLOWED"
+            ))
+
+        connection.commit()
+        flash("Document approved and confidentiality updated successfully!", "success")
+
+    except Exception as e:
+        connection.rollback()
+        print(f"Database error occurred: {e}")
+        flash("An error occurred while approving the document.", "danger")
+        
+    finally:
+        connection.close()
+
+    return redirect(url_for("home"))
 
 
 #initialize the application
