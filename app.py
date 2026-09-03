@@ -156,10 +156,10 @@ def add():
         try: 
             with connection.cursor() as cursor:
                 sql = """
-                    INSERT INTO documents (title, content, owner_id, department_id, clearance_required)
-                    VALUES (%s, %s, %s, %s, %s)
+                    INSERT INTO documents (title, content, owner_id, department_id)
+                    VALUES (%s, %s, %s, %s)
                 """
-                cursor.execute(sql, (title, content, owner_id, department_id, 4))
+                cursor.execute(sql, (title, content, owner_id, department_id))
 
             connection.commit()
             flash("Document added successfully!")

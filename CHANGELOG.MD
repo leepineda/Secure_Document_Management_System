@@ -15,6 +15,13 @@ Planned
 - Fix up SELECT
 - Fix up pass
 
+Known Issues
+---
+- using an ENUM and assigning top secret 4, that looks good on logic but if someone sees this code like months, will they have an idea what does 4 even mean? 
+
+Changed
+- Removed confidentialit on add route, removed confidentiality and mfa required in register html
+
 
 ## 1.0.3
 Added

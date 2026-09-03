@@ -393,3 +393,14 @@ I was wondering why they dont show it even tho its public then i forgot i placed
 
 So one month of inactivity, got back and reviwed what I learned and made some mistakes about SELECT FOR and the difference between session clear and generating a new session and why flask kind of blocks that, but general thing is, generating a new session every login is what almost every system uses.
 </details>
+
+<details>
+<summary> SEPTEMBER 3 2026 </summary>
+
+## SEPTEMBER 3 2026
+
+Got back, did some design on the registration UI and Login UI, 
+Also because of the new design we are gonna overhaul the internals, the confidentiality default is internal and we are forcing it to be top_secret and thats bad design, but thats mainly because I didnt account that the users shouldnt even have access to confidentiality let alone enter it, thats update for the admin side only, i removed the need for users to enter confidentiality. In the database it would always default to internal no need to manual put it, i need to go to the checks and make sure the admin is the only one who have access to internal, also removed the clearance required field on the documents table, the users from database will stay and we will migrate that to an admin table later, also the mfa required boolean we will also discard
+
+Wrestled with some decisions and asked myself, what even is my system? so thats what im gonna do figure out whats teh system is, and i just realized, my development life cycle is a mess, its backwards, the thing before the purpose, thats why its been a challenge,.
+</details>
