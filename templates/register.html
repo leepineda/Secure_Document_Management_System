@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 
 <html>
+    <head>
+        <link rel="stylesheet" href="static/style.css"> 
+    </head>
 <body>
-
+    <div class="register-container">
     <h1>Register User</h1>
-            <style>
-            .error { color: red; }
-            .success { color: green; }
-            .warning { color: orange; }
-            </style>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% for category, message in messages %}
@@ -21,15 +19,17 @@
         <form method = "POST" action = "/register">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <label>Enter username: </label>
-            <input type="text" name="username" required> <br> 
+            <input type="text" name="username" required> 
             <label>Enter email: </label>
-            <input type="email" name="email" required> <br>
+            <input type="email" name="email" required>
             <label>Create password: </label>
-            <input type="password" name="password" required> <br>
+            <input type="password" name="password" required>
 
                 <button type="submit">
                  Register 
                  </button>
         </form>
+        <p>Already have an account? <a href="/login">Login here</a></p>
+        </div>
 </body>
 </html>
