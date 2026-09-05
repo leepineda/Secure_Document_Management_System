@@ -404,3 +404,37 @@ Also because of the new design we are gonna overhaul the internals, the confiden
 
 Wrestled with some decisions and asked myself, what even is my system? so thats what im gonna do figure out whats teh system is, and i just realized, my development life cycle is a mess, its backwards, the thing before the purpose, thats why its been a challenge,.
 </details>
+
+<details>
+<summary> SEPTEMBER 5 2026 </summary>
+
+## SEPTEMBER 5 2026
+**## SEPTEMBER 5 2026**
+
+Did some code cleanup and learned an important lesson about how ENUM values should be handled.
+
+It is bad practice to rely on the numeric position of an ENUM value to determine its meaning. For example, if 1 = ACTIVE and the ENUM values are later changed or reordered, that same numeric value could represent something different. This can lead to incorrect data being interpreted by the system.
+
+Using ENUM is not like bad practice. It can actually be a good choice when the set of possible values is small, well-defined, and unlikely to change for a long time. For example, a status with only a few fixed states can be a good use case for ENUM.
+
+However, if the values are volatile or expected to change frequently, it is better to use stable string values or a separate reference table rather than relying on ENUM positions.
+
+Another lesson I learned is:
+
+Don't explicitly assign values in application queries when the database already provides the correct default.
+
+If a column already has a default value, there is no need to manually assign that same value in every SQL query. Doing so is redundant and makes the application unnecessarily responsible for something the database already handles.
+
+For example, if the database has:
+
+`status DEFAULT "PENDING"`
+
+there is no need for the application to explicitly insert `PENDING` every time a new record is created. The database can handle the default automatically.
+
+The overall lesson is to let each layer handle the responsibilities it is designed for and avoid unnecessary duplication of logic.
+
+Also removing the trust_level column in user_accounts, since its not gonna be needed, if we keep it and now we have thousands of users when we scale to using ABAC, now we have to assess the trust_level since all of them defaults to low. 
+
+Don't store an attribute simply because you might use it later. If trust_level isn't currently part of the system's authorization model or a meaningful business attribute, keeping it creates unnecessary data and future maintenance.
+
+</details>

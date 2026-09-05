@@ -153,3 +153,9 @@ ALTER TABLE user_accounts  ADD COLUMN lockout_until DATETIME DEFAULT NULL;
 ALTER TABLE documents
 MODIFY COLUMN status ENUM('approved', 'rejected', 'pending')
 DEFAULT 'pending';
+
+ALTER TABLE user_accounts 
+MODIFY COLUMN status ENUM('active', 'suspended', 'pending') 
+NOT NULL DEFAULT 'active'; -- subject to change: might need to default to pending if the system needs it 
+
+ALTER TABLE user_accounts DROP COLUMN trust_level;

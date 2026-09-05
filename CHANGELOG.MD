@@ -19,8 +19,10 @@ Known Issues
 ---
 - using an ENUM and assigning top secret 4, that looks good on logic but if someone sees this code like months, will they have an idea what does 4 even mean? 
 
-Changed
+Removed
 - Removed confidentialit on add route, removed confidentiality and mfa required in register html
+- Removed the status allocation on sql when registering, it all now auto goes to active default
+- Removed trust_level in user_accounts -> refer to sept 5 entry
 
 
 ## 1.0.3

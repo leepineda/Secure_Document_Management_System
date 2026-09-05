@@ -86,7 +86,7 @@ def search():
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT * FROM user_accounts WHERE username LIKE %s ",
+                "SELECT * FROM user_accounts WHERE username LIKE %s ", #this reads all users regardless if they are active or not, unavailable users like suspended, etc shouldnt be here
                 (f"%{query}%",)
             )
             results = cursor.fetchall()
@@ -413,9 +413,9 @@ def register():
             with connection.cursor() as cursor:
                 cursor.execute(
                     "INSERT INTO user_accounts " #user registers here
-                    "(email, username, status) "
-                    "VALUES (%s, %s, %s) ",
-                    (email, username, 1) #also
+                    "(email, username) " # status omitted — database defaults to 'active' for now
+                    "VALUES (%s, %s) ",
+                    (email, username) #
                 )
 
                 account_id = cursor.lastrowid
@@ -431,7 +431,7 @@ def register():
                     "INSERT INTO user_roles "
                     "(account_id, role_id) "
                     "VALUES (%s, %s) ",
-                    (account_id, 3)
+                    (account_id, 3) #3 is user and its value assigned on roles 
                 )
             connection.commit()
 
