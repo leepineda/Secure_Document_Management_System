@@ -24,6 +24,9 @@ Removed
 - Removed the status allocation on sql when registering, it all now auto goes to active default
 - Removed trust_level in user_accounts -> refer to sept 5 entry
 
+Added
+- Database privileges
+
 
 ## 1.0.3
 Added

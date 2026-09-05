@@ -438,3 +438,14 @@ Also removing the trust_level column in user_accounts, since its not gonna be ne
 Don't store an attribute simply because you might use it later. If trust_level isn't currently part of the system's authorization model or a meaningful business attribute, keeping it creates unnecessary data and future maintenance.
 
 </details>
+
+<details>
+<summary> SEPT 6 2026
+</summary>
+
+## SEPTEMBER 6 2026
+**## SEPTEMBER 6 2026**
+
+Enforcing least privilege at the database layer
+
+</details>

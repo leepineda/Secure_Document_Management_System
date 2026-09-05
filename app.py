@@ -431,7 +431,7 @@ def register():
                     "INSERT INTO user_roles "
                     "(account_id, role_id) "
                     "VALUES (%s, %s) ",
-                    (account_id, 3) #3 is user and its value assigned on roles 
+                    (account_id, 3) #3 is user role assign
                 )
             connection.commit()
 
