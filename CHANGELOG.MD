@@ -14,6 +14,7 @@ Planned
 - Fix the pending, and add admin confidentiality check and assignment
 - Fix up SELECT
 - Fix up pass
+- Fix the hash, the login route isnt consistent with the hashes, the lockout doesnt use a hash, it also needs to run the hash
 
 Known Issues
 ---

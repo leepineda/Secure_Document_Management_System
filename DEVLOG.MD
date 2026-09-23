@@ -440,12 +440,18 @@ Don't store an attribute simply because you might use it later. If trust_level i
 </details>
 
 <details>
-<summary> SEPT 6 2026
+<summary> SEPT 5 2026
 </summary>
 
-## SEPTEMBER 6 2026
-**## SEPTEMBER 6 2026**
+Enforcing least privilege at the database layer, also wanna add error pages but that will be for another day
 
-Enforcing least privilege at the database layer
+</details>
 
+<details>
+<summary>SEP 23 2026</summary>
+
+## SEPTEMBER 23 2026
+**## SEPTEMBER 23 2026**
+
+Finished the commit for this session, changed the routes and dont leave things you might need later, if its not part of the current model or requirements.
 </details>
