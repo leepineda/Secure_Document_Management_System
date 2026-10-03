@@ -37,7 +37,9 @@ repo instead of hidden. Known weaknesses are listed openly under
   internal documents, users see approved public documents
 - Authentication check on every protected route; role checks on admin actions
   (user deletion, document approval)
-- Admin approval endpoint (document approval is admin-only; currently default to approved, review page not built yet)
+- Admin approval endpoint (admin-only). New documents start as pending; the review page
+  isn't built yet, so approval currently needs a direct POST to /approve/<id>, and only
+  admins can see pending documents
 
 **Audit Logging**
 - Append-only `security_audit_logs` table recording action, actor, IP, and
