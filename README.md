@@ -37,8 +37,7 @@ repo instead of hidden. Known weaknesses are listed openly under
   internal documents, users see approved public documents
 - Authentication check on every protected route; role checks on admin actions
   (user deletion, document approval)
-- Admin approval workflow: new documents start as `pending` and are published
-  with an assigned clearance level
+- Admin approval endpoint (document approval is admin-only; currently default to approved, review page not built yet)
 
 **Audit Logging**
 - Append-only `security_audit_logs` table recording action, actor, IP, and
