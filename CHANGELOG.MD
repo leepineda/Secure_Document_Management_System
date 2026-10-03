@@ -3,6 +3,35 @@ Changelog
 All notable changes to this project are documented here.
 Format: Added / Changed / Fixed / Removed / Security / Known Issues / Planned
 
+## 1.0.5 2026-10-03 
+Security
+---
+- Removed default fallbacks in get_connection() (user "root", empty password, "test_db"). Before: os.getenv("DB_USER", "root"). Now: os.environ["DB_USER"]. A missing or misspelled variable now stops the app instead of silently connecting as root, which would bypass the least-privilege flask_app account.
+- Added a startup check that raises RuntimeError listing any missing environment variables (SECRET_KEY, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)
+- Login query now excludes soft-deleted accounts (is_deleted = FALSE), so deleted users can no longer log in. They get the same "Invalid credentials." response as unknown users.
+- Locked-out accounts now run a dummy hash check before returning, so response time no longer reveals which accounts are locked. timing not yet measured 
+- Added a before_request check that re-validates the logged-in account on every request; deleted or suspended accounts are logged out immediately. Verified by soft-deleting a logged-in test user.
+
+Known Issues
+---
+- Home and search routes expose all user accounts to any logged-in user
+- Audit log doesn't record failed logins for unknown usernames or deleted accounts, admin
+  deletes, or 403 denials
+- role_name is cached in the session, so role changes don't apply until the user logs in again
+- Logout is a GET request
+- approve route doesn't validate clearance_required against allowed values
+- Role checks exist only on delete and approve; add and search have none
+- except pass still used in login rollback
+
+Planned
+---
+- Refresh role_name from the database on each request
+- Add a log_event() helper to replace the repeated audit-log inserts
+- Log login attempts on deleted accounts and unknown usernames
+- IP-based rate limiting
+- Add pytest tests
+- Run SAST (Bandit) and DAST (OWASP ZAP); document findings
+- Dockerize the app
 
 ## 1.0.4
 
@@ -21,7 +50,7 @@ Known Issues
 - using an ENUM and assigning top secret 4, that looks good on logic but if someone sees this code like months, will they have an idea what does 4 even mean? 
 
 Removed
-- Removed confidentialit on add route, removed confidentiality and mfa required in register html
+- Removed confidentiality on add route, removed confidentiality and mfa required in register html
 - Removed the status allocation on sql when registering, it all now auto goes to active default
 - Removed trust_level in user_accounts -> refer to sept 5 entry
 

@@ -455,3 +455,13 @@ Enforcing least privilege at the database layer, also wanna add error pages but 
 
 Finished the commit for this session, changed the routes and dont leave things you might need later, if its not part of the current model or requirements.
 </details>
+
+<details>
+<summary> OCT 3 2026</summary>
+
+## OCTOBER 3 2026
+**## OCTOBER 3 2026**
+
+Changed a few things, removed the get connection to default to root and also added a check when a user is deleted while logged in and kicks them out, also deleted users now cant login, also added env checking if a env file is missing or wrong
+
+</details>

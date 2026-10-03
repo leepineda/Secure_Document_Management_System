@@ -10,6 +10,11 @@ from datetime import datetime, timedelta #for lockout
 
 load_dotenv()   # reads .env and puts values into os.environment
 
+required = ["SECRET_KEY", "DB_HOST", "DB_USER", "DB_PASSWORD", "DB_NAME"] #checks if the environment variables are right
+missing = [v for v in required if not os.getenv(v)]
+if missing:
+    raise RuntimeError(f"Missing environment variables: {', '.join(missing)}")
+
 app = Flask(__name__)
 
 app.secret_key = os.getenv("SECRET_KEY")
@@ -27,12 +32,42 @@ app.config.update(
 #Sql connection 
 def get_connection():
     return pymysql.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "test_db"),
+        host=os.environ["DB_HOST"],
+        user=os.environ["DB_USER"],  
+        password=os.environ["DB_PASSWORD"],
+        database=os.environ["DB_NAME"],
         cursorclass=pymysql.cursors.DictCursor
     )
+
+@app.before_request #
+def check_session_still_valid():
+
+    if request.endpoint in ("login", "register", "logout", "static"):
+        return
+
+    if "account_id" not in session:
+        return 
+
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT status FROM user_accounts "
+                "WHERE account_id = %s AND is_deleted = FALSE",
+                (session["account_id"],)
+            )
+            user = cursor.fetchone()
+    except Exception as e:
+        print(f"Session check error: {e}")
+        session.clear()
+        return redirect(url_for("login"))
+    finally:
+        connection.close()
+
+    if not user or user["status"] != "active":
+        session.clear()
+        flash("Your session has ended. Please log in again.", "error")
+        return redirect(url_for("login"))
 
 @app.route("/")
 def home():
@@ -185,7 +220,7 @@ def get_lockout_duration(attempts):
 
 @app.route("/login", methods = ["GET", "POST"]) 
 def login():
-
+    
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
@@ -197,7 +232,7 @@ def login():
                     SELECT ua.account_id, ua.status, uc.password_hash, ua.login_attempts, ua.lockout_until
                     FROM user_accounts ua 
                     JOIN user_credentials uc ON ua.account_id = uc.account_id 
-                    WHERE ua.username = %s
+                    WHERE ua.username = %s AND ua.is_deleted = FALSE
                 """
                     
                 cursor.execute(sql, (username,))
@@ -211,6 +246,7 @@ def login():
                 account_id = user["account_id"]
 
                 if user["lockout_until"] and datetime.now() < user["lockout_until"]:
+                    check_password_hash(DUMMY_HASH, password) #now also checks the hash
                     cursor.execute(
                         "INSERT INTO security_audit_logs "
                         "(account_id, action_performed, resource_affected, ip_address, status) "
