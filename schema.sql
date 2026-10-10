@@ -45,6 +45,7 @@ INSERT INTO roles (role_name) VALUES
 CREATE TABLE user_roles (
     account_id INT,
     role_id INT,
+    CONSTRAINT one_role_per_user UNIQUE (account_id),
     FOREIGN KEY (account_id) REFERENCES user_accounts(account_id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE,
     PRIMARY KEY (account_id, role_id)

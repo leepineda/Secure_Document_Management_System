@@ -159,3 +159,8 @@ MODIFY COLUMN status ENUM('active', 'suspended', 'pending')
 NOT NULL DEFAULT 'active'; -- subject to change: might need to default to pending if the system needs it 
 
 ALTER TABLE user_accounts DROP COLUMN trust_level;
+<<<<<<< HEAD:schema_Evolution.sql
+=======
+
+ALTER TABLE user_roles ADD CONSTRAINT one_role_per_user UNIQUE (account_id); -- added so one role = one user
+>>>>>>> b90e665 (Add role validation to session check and log_event() audit helper):Schema_Evolution.sql

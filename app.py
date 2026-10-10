@@ -39,21 +39,25 @@ def get_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
-@app.before_request #
-def check_session_still_valid():
+VALID_ROLES = {"admin", "moderator", "user"}
 
+@app.before_request #this function validates the user if they are deleted or not, and also to for checking roles 
+def check_session_still_valid():
     if request.endpoint in ("login", "register", "logout", "static"):
         return
 
     if "account_id" not in session:
-        return 
+        return
 
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT status FROM user_accounts "
-                "WHERE account_id = %s AND is_deleted = FALSE",
+                "SELECT ua.status, r.role_name "
+                "FROM user_accounts ua "
+                "JOIN user_roles ur ON ur.account_id = ua.account_id "
+                "JOIN roles r ON r.role_id = ur.role_id "
+                "WHERE ua.account_id = %s AND ua.is_deleted = FALSE",
                 (session["account_id"],)
             )
             user = cursor.fetchone()
@@ -64,10 +68,17 @@ def check_session_still_valid():
     finally:
         connection.close()
 
-    if not user or user["status"] != "active":
+    if (
+        not user
+        or user["status"] != "active"
+        or user["role_name"] not in VALID_ROLES
+        or user["role_name"] != session.get("role_name")
+    ):
         session.clear()
         flash("Your session has ended. Please log in again.", "error")
         return redirect(url_for("login"))
+
+    session.get("role_name")
 
 @app.route("/")
 def home():
@@ -121,7 +132,7 @@ def search():
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT * FROM user_accounts WHERE username LIKE %s ", #this reads all users regardless if they are active or not, unavailable users like suspended, etc shouldnt be here
+                "SELECT username FROM user_accounts WHERE username LIKE %s ", #this reads all users regardless if they are active or not, unavailable users like suspended, etc shouldnt be here
                 (f"%{query}%",)
             )
             results = cursor.fetchall()
@@ -150,6 +161,11 @@ def delete_user(account_id):
                 "SET is_deleted = TRUE "
                 "WHERE account_id = %s ", 
                 (account_id,)
+            )
+
+            cursor.execute(
+                "INSERT INTO security_audit_logs log"
+                ""
             )
 
         connection.commit()
@@ -292,19 +308,7 @@ def login():
                     
                 # only after if match we check status
                 if user["status"] == "suspended":
-                    cursor.execute(
-                        "INSERT INTO security_audit_logs "
-                        "(account_id, action_performed, resource_affected, ip_address, status) "
-                        "VALUES (%s, %s, %s, %s, %s) ",
-                        (
-                            account_id,
-                            "Login Suspended Account",
-                            "user_accounts",
-                            request.remote_addr,
-                            "DENIED"
-                        )
-                    )
-                    connection.commit()
+                    log_event("Login Suspended Account", "DENEID", account_id, resource="user_accounts")
                     flash("Invalid credentials.", "error")
                     return redirect(url_for("login"))
 
@@ -554,6 +558,28 @@ def logout():
     
     return redirect(url_for("login"))
 
+@app.route("/approve", methods=["GET"])
+def approve_page():
+
+    if "account_id" not in session:
+        flash("You must be logged in to perform this action.", "error")
+        return redirect(url_for("login"))
+
+    if session.get("role_name") != "admin":
+        return "Unauthorized: You do not have permission to perform this action.", 403
+
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT document_id, title FROM documents WHERE status = 'pending'"
+            )
+            documents = cursor.fetchall()
+    finally:
+        connection.close()
+
+    return render_template("approve.html", documents=documents)
+
 @app.route("/approve/<int:document_id>", methods=["POST"])
 def approve(document_id):
 
@@ -561,8 +587,8 @@ def approve(document_id):
         flash("You must be logged in to perform this action.", "error")
         return redirect(url_for("login"))
 
-    if session.get("role_name") not in ["admin"]:
-        return "Unauthorized: You do not have permission to perform this action.", 403
+    if session.get("role_name") != "admin":
+            return "Unauthorized: You do not have permission to perform this action.", 403
 
     clearance_required = request.form.get("clearance_required")
     if not clearance_required:
@@ -612,6 +638,42 @@ def approve(document_id):
 
     return redirect(url_for("home"))
 
+VALID_LOG_STATUSES = {"ALLOWED", "DENIED", "ERROR"}
+
+def log_event(action, status, account_id, resource=None, connection=None):
+    """Write one row to security_audit_logs.
+
+    Pass connection to join an existing transaction; otherwise the log
+    is written on its own connection so it survives a rollback.
+    """
+    if status not in VALID_LOG_STATUSES:
+        raise ValueError(f"Invalid audit status: {status}")
+
+    own_connection = connection is None
+    if own_connection:
+        connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO security_audit_logs "
+                "(account_id, action_performed, resource_affected, ip_address, status) "
+                "VALUES (%s, %s, %s, %s, %s)",
+                (
+                    account_id,
+                    action[:100],
+                    resource[:100] if resource else None,
+                    (request.remote_addr or "")[:45] or None,
+                    status,
+                ),
+            )
+        if own_connection:
+            connection.commit()
+    except Exception as e:
+        print(f"Audit log error: {e}")
+    finally:
+        if own_connection:
+            connection.close()
 
 #initialize the application
 if __name__ == "__main__":

@@ -3,6 +3,40 @@ Changelog
 All notable changes to this project are documented here.
 Format: Added / Changed / Fixed / Removed / Security / Known Issues / Planned
 
+## 1.0.6 
+started 2026-10-04
+
+Security
+---
+- Added approve webpages (admin only) non admins get prompted with a unauthorized access when clicking approve button.
+- Extended the 1.0.5 per-request session validation to also check role, users are logged out if their account is deleted or deactivated, or if their role in the database no longer matches the session. Role changes now apply immediately instead of at next login
+- Enforced one role per account (UNIQUE on user_roles.account_id)
+- Changed the search query to only show username 
+- Added a log_event() helper for security_audit_logs. Validates status before writing, and logs on its own connection so entries survive a rollback
+
+Changed
+---
+- Removed Known Issues Entry: "Home and search routes expose all user accounts to any logged-in user on Known Issues" its a design decision and it only searches username nothing else 
+
+Planned
+---
+- Convert the remaining audit-log inserts in login (and other routes) to log_event()
+- Log login attempts on deleted accounts and unknown usernames
+- IP-based rate limiting
+- Add pytest tests
+- Run SAST (Bandit) and DAST (OWASP ZAP); document findings
+- Dockerize the app
+
+Known Issues
+---
+- Audit log doesn't record failed logins for unknown usernames or deleted accounts, admin
+  deletes, or 403 denials
+- Logout is a GET request
+- approve route doesn't validate clearance_required against allowed values
+- Role checks exist only on delete and approve; add and search have none
+- except pass still used in login rollback
+- Register assigns the default role with a hardcoded role_id (3). It works because the seed order fixes user = 3, but it depends on that order and isn't readable; should look up "user" by role_name instead
+
 ## 1.0.5 2026-10-03 
 Security
 ---
@@ -105,8 +139,6 @@ Known Issues / Need fixing
 
 Planned
 ---
-- Add CSRF protection
-- Add rate limiting
 - Restrict document creation by role
 - Add login attempt logging to security_audit_logs
 - Integrate SAST, DAST, etc... tools

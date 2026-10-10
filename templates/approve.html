@@ -1,10 +1,60 @@
 <!DOCTYPE html>
-    <head>
-        <title> Approve Documents</title>
-    </head>
+<head>
+    <title>Approve Documents</title>
+</head>
+<body>
 
-    <body>
+    <h1>Pending Documents</h1>
 
-    </body>
+    <p><a href="{{ url_for('home') }}">Back to home</a></p>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li>[{{ category }}] {{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    {% if documents %}
+        <table border="1">
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Confidentiality Level</th>
+                <th>Action</th>
+            </tr>
+
+            {% for doc in documents %}
+            <tr>
+                <td>{{ doc.document_id }}</td>
+                <td>{{ doc.title }}</td>
+
+                <form action="{{ url_for('approve', document_id=doc.document_id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <td>
+                        <select name="clearance_required" required>
+                            <option value="">-- select --</option>
+                            <option value="public">Public</option>
+                            <option value="internal">Internal</option>
+                            <option value="confidential">Confidential</option>
+                            <option value="secret">Secret</option>
+                        </select>
+                    </td>
+
+                    <td>
+                        <button type="submit">Approve</button>
+                    </td>
+                </form>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No pending documents.</p>
+    {% endif %}
+
+</body>
 </html>

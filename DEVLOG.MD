@@ -465,3 +465,39 @@ Finished the commit for this session, changed the routes and dont leave things y
 Changed a few things, removed the get connection to default to root and also added a check when a user is deleted while logged in and kicks them out, also deleted users now cant login, also added env checking if a env file is missing or wrong
 
 </details>
+
+<details>
+<summary>OCT 6, 7, 10 2026</summary>
+
+## OCTOBER 6 2026
+**## OCTOBER 6 2026**
+
+I had a problem that i listed as an issue is this "Home and search routes expose all user accounts to any logged-in user" but i said why is that bad? and I said to myself I dont think that's an issue but a Design decision / information disclosure, i havent disclosed anything on the search only the usernames and nothing else so i removed it.
+
+## OCTOBER 7 2026
+**## OCTOBER 7 2026**
+
+So as I was adding new routes I noticed I have been missing the audit trails for each I need to add the audit for non-username logins, deletion etc... I need to make this a one function so I want to use helpers now, basically a function that you call and you just change the parameters and the arguments so it matches the block. 
+
+## OCTOBER 10 2026
+**## OCTOBER 10 2026 ##**
+
+Role changes weren't applying until the user logged in again, because role_name was cached in the session. (a known issue from 1.0.5) Someone demoted from admin would keep admin access until their session ended. I extended the before_request check so it also compares the role in the database to the role stored in the session.
+
+I decided to log the user out on a mismatch instead of silently updating the session. A silent update hides the change from the user, and forcing a fresh login makes them re-authenticate under their new role. It's also easier to audit.
+
+I had two before_request functions doing almost the same query (one for deleted/inactive accounts, one for roles). Flask registers both, so every request ran the same query twice. I merged them into one check_session_still_valid, since the role check already covered everything the first one did.
+
+I also hit a bug where I wrote `VALID_ROLES ("admin", "moderator", "user")` without the `=`. Python read it as a function call, which is why Pylance said it wasn't defined.
+
+Validated by changing a logged_in user role in database mid session, and when refreshed it kicked out the user who's role didn't match the database
+
+I built a log_event() helper to replace the repeated audit-log INSERT blocks in login. The code was getting too big, repeated six times. The helper takes action, status, account_id and an optional resource, and writes one row to security_audit_logs. By default it uses its own connection, so the log entry survives a rollback of the main transaction (same idea as moving the audit log outside the transaction in the register fix).
+
+I almost shipped a bug in it. My first version fell back to the session's account_id when none was passed, but None also means "no account" for unknown usernames. A leftover session from another account would have gotten those failed attempts logged under it. I made account_id a required parameter instead, so nothing gets logged under the wrong account silently. I also looked at a sentinel-object fix, but I couldn't explain it well yet, so I went with the simpler design.
+
+The helper validates status against VALID_LOG_STATUSES and raises a ValueError before touching the database. I tested it by converting the suspended-account branch: a suspended user logs in with the right password, gets "Invalid credentials", and a DENIED row appears. Then I changed "DENIED" to "DENEID" on purpose: no row was written, the user saw only the generic error, and the real message (Invalid audit status: DENEID) appeared in the terminal.
+
+Still to do, convert the other five inserts in login, one at a time. I wanna familiarize myself with helpers so this is A form of abstraction.
+
+</details>
