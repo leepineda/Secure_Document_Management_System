@@ -11,7 +11,7 @@ This is a transparent learning project. Every security control here was implemen
 - Hardened session cookies (`HttpOnly`, `Secure`, `SameSite=Lax`).
 - Session cleared and reissued on every login to prevent session fixation.
 - Per-request session validation detects changes (deleted account, suspended status, role changes) and invalidates the session immediately.
-- Dummy-hash comparisons on unknown/locked accounts to prevent timing-based user enumeration.
+- Dummy-hash comparisons on unknown/locked accounts to mitigate timing-based user enumeration.
 
 **Brute-Force & Spam Protection**
 - IP-based rate limiting via `Flask-Limiter` on authentication and data submission endpoints.
