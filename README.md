@@ -1,146 +1,51 @@
 # Secure Document Management System
 
-A security-focused document management system built with Flask and MySQL:
-role-based access control, hardened authentication, and database-enforced audit
-logging. Started May 2026, in active development.
+A security-focused document management system built with Flask and MySQL, featuring role-based access control (RBAC), hardened authentication, IP rate limiting, and database-enforced audit logging. Started May 2026, in active development.
 
-This is a learning project, but not a tutorial clone. Every security control
-here was implemented, tested, broken, and re-reasoned from scratch, and the
-full history of that process, including the mistakes, is documented in this
-repo instead of hidden. Known weaknesses are listed openly under
-[Known Limitations](#known-limitations).
+This is a transparent learning project. Every security control here was implemented, tested, broken, and re-reasoned from scratch to understand the mechanics behind modern web security.
 
 ## Key Features
 
 **Authentication & Session Security**
-- Password hashing via Werkzeug (scrypt)
-- Hardened session cookies (`HttpOnly`, `Secure`, `SameSite=Lax`)
-- Session cleared and reissued on every login to prevent session fixation
-- Per-request session validation: if an account is deleted or suspended while
-  the user is logged in, their session ends on the next request
-- Dummy-hash comparison on unknown usernames and locked accounts, to reduce
-  timing-based user enumeration at login
-- Generic "Invalid credentials." response for unknown, deleted, locked, and
-  suspended accounts
+- Password hashing via Werkzeug (scrypt).
+- Hardened session cookies (`HttpOnly`, `Secure`, `SameSite=Lax`).
+- Session cleared and reissued on every login to prevent session fixation.
+- Per-request session validation detects changes (deleted account, suspended status, role changes) and invalidates the session immediately.
+- Dummy-hash comparisons on unknown/locked accounts to prevent timing-based user enumeration.
 
-**Brute-Force Protection**
-- Tiered account lockout: 5 failed attempts locks the account for 5 minutes,
-  10 failed attempts for 30 minutes. The counter resets on a successful login.
-- Login attempts and lockouts are logged with IP address
+**Brute-Force & Spam Protection**
+- IP-based rate limiting via `Flask-Limiter` on authentication and data submission endpoints.
+- Tiered account lockout (5 minutes for 5 fails, 30 minutes for 10 fails).
 
-**CSRF Protection**
-- Flask-WTF CSRF tokens on every state-changing (POST) route
+**Access Control & Authorization**
+- `@roles_required` decorator enforces RBAC centrally across protected routes.
+- Three roles (admin, moderator, user) with clearance-gated document visibility.
+- Admin-only document approval endpoint validating against strict `clearance_required` database ENUMs.
+- Safeguards preventing administrators from deleting their own accounts.
 
-**Role-Based Access Control**
-- Three roles (admin / moderator / user) with clearance-gated document
-  visibility: admins see everything, moderators see approved public and
-  internal documents, users see approved public documents
-- Authentication check on every protected route; role checks on admin actions
-  (user deletion, document approval)
-- Admin approval endpoint (admin-only). New documents start as pending; the review page
-  isn't built yet, so approval currently needs a direct POST to /approve/<id>, and only
-  admins can see pending documents
-
-**Audit Logging**
-- Append-only `security_audit_logs` table recording action, actor, IP, and
-  outcome (ALLOWED / DENIED / ERROR) for registration, login events, and
-  document approvals
-- Enforced at the database layer: the app's MySQL account has only `INSERT` on
-  this table, so even a compromised application cannot edit or delete log
-  entries
-
-**Database-Layer Least Privilege**
-- Dedicated MySQL service account (not root) with per-table `GRANT`
-  statements, e.g. `SELECT, INSERT, UPDATE` on `documents` and `INSERT`-only on
-  `security_audit_logs`. No `DELETE` is granted on any table. See
-  [`DATABASE_PRIVILEGE.md`](./DATABASE_PRIVILEGE.md).
-- The app refuses to start if any required environment variable is missing,
-  so a misconfiguration can never silently fall back to a more privileged
-  database account
-
-**Data Integrity**
-- Soft deletes (`is_deleted`) instead of hard deletes, to preserve the audit
-  trail
-- Multi-table writes wrapped in transactions with commit/rollback, so a
-  failure partway through never leaves a half-written record
-- Parameterized queries throughout
+**Audit Logging & Database Security**
+- Centralized `log_event()` helper safely tracks action, actor, IP, and outcome in an append-only `security_audit_logs` table.
+- Database-layer least privilege: the application runs on a dedicated MySQL service account with strictly limited `GRANT` permissions and no `DELETE` access.
+- Soft deletes (`is_deleted`) to preserve relational data and forensic audit trails.
+- Multi-table writes wrapped in database transactions with automatic rollbacks.
 
 ## Tech Stack
 
-- **Language:** Python
-- **Backend:** Flask, Flask-WTF
-- **Database:** MySQL / MariaDB (PyMySQL driver)
-- **Auth:** Werkzeug (scrypt password hashing)
-- **Config:** python-dotenv
+- **Backend:** Python, Flask, Flask-WTF, Flask-Limiter
+- **Database:** MySQL / MariaDB (PyMySQL)
+- **Security:** Werkzeug (scrypt)
+- **Environment:** python-dotenv
 
-## Project Structure
+## Documentation Focus
 
-```
-.
-├── app.py                    # Main Flask application and routes
-├── context.py                # App/db context helpers
-├── pdp.py                    # Policy Decision Point (planned, not yet implemented)
-├── schema.sql                # Current, canonical database schema
-├── schema_evolution.sql      # Full history of schema decisions, incl. mistakes
-├── DATABASE_PRIVILEGE.md     # SQL for the least-privilege DB service account
-├── CHANGELOG.MD              # Version-by-version log of what changed and why
-├── DEVLOG.MD                 # Day-by-day design reasoning (edited for clarity)
-├── DEVLOG_raw.MD             # The same log, unfiltered and unedited
-├── static/
-├── templates/
-└── requirements.txt
-```
-
-## Documentation
-
-Documentation is treated as part of the deliverable:
-
-- **`CHANGELOG.MD`**: what changed, release by release (Added / Changed /
-  Fixed / Security / Known Issues / Planned).
-- **`DEVLOG.MD`**: the reasoning behind those changes: what broke, what was
-  learned, which tradeoffs were considered.
-- **`DEVLOG_raw.MD`**: the same journal in its original, unfiltered form.
-  Expect informal language.
-- **`schema_evolution.sql`**: every schema change in the order it happened,
-  including the broken queries and their fixes.
-
-## Known Limitations
-
-Found through self-review and documented rather than hidden. Each is tracked
-in `CHANGELOG.MD`.
-
-- The home and search routes show all user accounts to any logged-in user
-- Audit logging does not yet cover failed logins for unknown usernames,
-  attempts on deleted accounts, admin deletions, or 403 denials
-- `role_name` is cached in the session, so role changes apply only after the
-  user logs in again
-- Registration reveals whether a username or email is already taken
-  (user enumeration), and the lockout can be triggered against another user's
-  account (denial of service); IP-based rate limiting is planned
-- Logout is a GET request
-- Only the delete and approve routes check roles; document creation and
-  search do not
-- `clearance_required` on the approve route is not validated in application
-  code
-- The app has not yet been scanned with SAST/DAST tools and has no automated
-  tests
-
-## Status / Roadmap
-
-In progress:
-- Refactoring route-level access checks into reusable decorators
-- Refreshing the role from the database on each request
-
-Planned:
-- Audit log helper function, replacing repeated inserts
-- SAST with Bandit, and DAST with OWASP ZAP; findings documented in the repo
-- Automated tests with pytest
-- Docker setup
-- ERD and data dictionary for the schema
+Documentation is treated as a core deliverable of this project:
+- **`CHANGELOG.MD`**: Version history and feature tracking.
+- **`DEVLOG.MD`**: Curated reasoning behind design decisions, failures, and tradeoffs.
+- **`schema_evolution.sql`**: Chronological record of database schema decisions.
 
 ## Setup
 
-1. Clone the repo and install dependencies:
+1. Clone the repository and install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
@@ -148,28 +53,19 @@ Planned:
    ```bash
    mysql -u root -p < schema.sql
    ```
-3. Create the least-privilege database user by running the statements in
-   `DATABASE_PRIVILEGE.md` (replace the placeholder password).
-4. Create a `.env` file in the project root. All five variables are required;
-   the app will not start if any is missing:
-   ```
+3. Apply the least-privilege database user permissions outlined in `DATABASE_PRIVILEGE.md`.
+4. Create a `.env` file in the project root:
+   ```text
    DB_HOST=localhost
    DB_USER=flask_app
    DB_PASSWORD=your_password
    DB_NAME=secure
-   SECRET_KEY=your_flask_secret_key
+   SECRET_KEY=your_generated_secret_key
    ```
-   Generate a secret key with:
-   ```bash
-   python -c "import secrets; print(secrets.token_hex(32))"
-   ```
-5. Run the app:
+   *(Generate a secure secret key using: `python -c "import secrets; print(secrets.token_hex(32))"`)*
+5. Run the application:
    ```bash
    flask run
-   ```
-   Session cookies are set with the `Secure` flag, so run it behind HTTPS
-   outside of local development.
 
 ## Author
-
 Justine Lee G. Pineda, [github.com/leepineda](https://github.com/leepineda)
