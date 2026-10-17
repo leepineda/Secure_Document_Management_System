@@ -6,6 +6,15 @@ Format: Added / Changed / Fixed / Removed / Security / Known Issues / Planned
 ## 1.0.6 
 started 2026-10-04
 
+Added
+---
+- Changed the templates to use a minimalist design, used my figma project portfolio to get my design and used AI to convert the pages and css to match
+- Added a try_log_event() helper, a wrapper around log_event() for denial and error paths so a broken audit log can't cause a second crash
+
+Removed
+--- 
+- removed users showing on home, but kept it in admin page now only documents that are within their scope are shown
+
 Security
 ---
 - Added approve webpages (admin only) non admins get prompted with a unauthorized access when clicking approve button.
@@ -13,29 +22,46 @@ Security
 - Enforced one role per account (UNIQUE on user_roles.account_id)
 - Changed the search query to only show username 
 - Added a log_event() helper for security_audit_logs. Validates status before writing, and logs on its own connection so entries survive a rollback
+- Completed the deletion log using log_helper
+- Added so admins cant delete their own account
+- Added a roles_required decorator
+- LOGOUT is now a post 
+- roles_required now guards home, search, add (any role) and delete, approve page, approve (admin only); non-matching roles get a 403 and a DENIED audit row
+- Login attempts on unknown usernames and on deleted accounts are now logged (DENIED), with the same generic message and dummy-hash timing as other failures
+- Login success is logged before the session is created, if the log fails the login fails too
+- Also addded IP Based limiting using Flask-Limiter, but the memory lives in RAM so each time we refresh the flask server, rate limits also reset, later we need a dedicated memory like Redis
 
 Changed
----
+--- 
 - Removed Known Issues Entry: "Home and search routes expose all user accounts to any logged-in user on Known Issues" its a design decision and it only searches username nothing else 
+- Denied access is now logged as "Unauthorized Access" with the route name as the resource (was "Approve Page Access" / "Approve Document" with resource "documents")
+- Anonymous requests to protected routes are redirected to login without a flash (delete used to return 403)
+- Login query no longer filters is_deleted in the WHERE, it selects it so deleted accounts can be told apart from unknown usernames
+- Registration failure handler now catches Exception instead of only MySQLError, message changed to "Registration Failed: An error occurred."
+- VALID_CLEARANCES moved from inside approve() to module level
+- Line endings changed from CRLF to LF
+
+Fixed
+---
+- Audit log doesn't record failed logins for unknown usernames or deleted accounts, admin
+  deletes, or 403 denials (unknown and deleted logins and 403 denials are now logged, admin deletes were already logged in the code)
+- Logout is a GET request (now POST with CSRF token)
+- approve route doesn't validate clearance_required against allowed values (the check was already in the code, constant moved to module level, see Known Issues about the ENUM)
+- Role checks exist only on delete and approve; add and search have none (roles_required decorator on every protected route)
+- except pass still used in login rollback (now catches Exception and prints the rollback error)
+- Register assigns the default role with a hardcoded role_id (3). It works because the seed order fixes user = 3, but it depends on that order and isn't readable; should look up "user" by role_name instead (now looked up by name with INSERT ... SELECT, raises if the role is missing)
+- Registration success log was never saved, it ran after commit() on the same connection and was rolled back on close (now inside the transaction before commit)
+- Registration failure logs used account_id before it existed (NameError swallowed by the try/except) and would have pointed at a rolled-back row (now logged with account_id None)
+- Approve showed nothing when the database step failed (now flashes an error)
+- forced logout now also have recorded logs
 
 Planned
 ---
-- Convert the remaining audit-log inserts in login (and other routes) to log_event()
-- Log login attempts on deleted accounts and unknown usernames
 - IP-based rate limiting
 - Add pytest tests
 - Run SAST (Bandit) and DAST (OWASP ZAP); document findings
 - Dockerize the app
 
-Known Issues
----
-- Audit log doesn't record failed logins for unknown usernames or deleted accounts, admin
-  deletes, or 403 denials
-- Logout is a GET request
-- approve route doesn't validate clearance_required against allowed values
-- Role checks exist only on delete and approve; add and search have none
-- except pass still used in login rollback
-- Register assigns the default role with a hardcoded role_id (3). It works because the seed order fixes user = 3, but it depends on that order and isn't readable; should look up "user" by role_name instead
 
 ## 1.0.5 2026-10-03 
 Security

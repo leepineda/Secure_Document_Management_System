@@ -501,3 +501,24 @@ The helper validates status against VALID_LOG_STATUSES and raises a ValueError b
 Still to do, convert the other five inserts in login, one at a time. I wanna familiarize myself with helpers so this is A form of abstraction.
 
 </details>
+
+<details>
+<summary>OCT 17 2026</summary>
+
+## OCTOBER 17 2026 ##
+
+Understanding and learning shared and independent transactions and what to do with them, but i get the nuance, some transactions are shared or independent, some needs seperate logs and some are shared, and in those shared transacs theres a chance those two could fail leading to no record, the design is do you need or require to also record the failure?
+
+I forgot about this session["account_id"] = user["account_id"] only works when you assigned the value like on the login i assigned account_id = user["account_id"] so i can use the session["account_id"] whenever i need it without assigning a value and its much better than doing it again and calling the attribute like account_id itself, e.g logs This is just for session though not for Plain variables that you need to grab on the route. 
+
+Also used gemini to look at my figma design and make it to my document system
+
+Decided to stop adding stuff and just clean up app.py for 1.0.6, went through the known issues with Claude and made it explain every change so i actually learn them instead of just pasting. The one error was that the registration success log was never being saved. The log_event after commit() on the same connection, so it just got rolled back when the connection closed, and i never noticed because the try/except swallowed it. Same idea as the transaction thing above, where the log sits matters.
+
+Also the decorator makes a lot of sense now, i had the same role check copy pasted in every route and add and search had none, so now the rule is in one place and a route cant forget it. And i compared the code to my schema and found VALID_CLEARANCES had "restricted" while the ENUM is top_secret, so an admin could never have approved a top_secret document, lesson is check the code against the schema, not just the code.
+
+And also discovered about best effort handling.
+
+Next are tests and Docker. Gonna re read the decorator and wraps until i can explain it without looking.
+
+</details>

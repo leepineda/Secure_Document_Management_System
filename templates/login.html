@@ -1,31 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
-    <link rel="stylesheet" href="static/style.css"> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-      <div class="login-container">
-        <h2>Login Page</h2>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% for category, message in messages %}
-                {% if category in ["error", "success", "danger"] %}
-                    <p class="{{ category }}">{{ message }}</p>
-                {% endif %}
-            {% endfor %}
-        {% endwith %}
+    <header class="top-nav">
+        <a href="{{ url_for('login') }}" class="brand">
+            just in
+            <span>Security Portal</span>
+        </a>
+        <nav class="nav-links">
+            <a href="{{ url_for('register') }}">Register</a>
+        </nav>
+    </header>
 
-        <form action="/login" method="POST">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <label for="username">Username:</label>
+    <main class="auth-shell">
+        <div class="bento-card auth-card">
+            <div class="card-index">01</div>
+            <h2>Sign In</h2>
+            <p class="subtitle">Enter your credentials to access the workspace.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    {% if category in ["error", "success", "danger"] %}
+                        <div class="flash-box {{ category }}">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endwith %}
+
+            <form action="/login" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <label for="username">Username</label>
                 <input type="text" id="username" name="username" required autocomplete="username">
-                <label for="password">Password:</label>
+                
+                <label for="password">Password</label>
                 <input type="password" id="password" name="password" required autocomplete="current-password">
-            <button type="submit">Log In</button>
-        </form>
-        <p>Don't have an account? <a href="/register">Register here</a></p>
-      </div>
+                
+                <button type="submit" class="btn-full">Log In</button>
+            </form>
+
+            <p class="footer-link">Don't have an account? <a href="/register">Register here</a></p>
+        </div>
+    </main>
+
 </body>
 </html>

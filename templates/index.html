@@ -1,67 +1,119 @@
-<!--
-
-Step 1 code
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Flask App</title>
+    <meta charset="UTF-8">
+    <title>Dashboard — Secure Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Hello! Flask is working! 🎉</h1>
+
+    <header class="top-nav">
+        <a href="{{ url_for('home') }}" class="brand">
+            just in
+            <span>Role: {{ session.get('role_name', 'user') }}</span>
+        </a>
+        <nav class="nav-links">
+            <a href="{{ url_for('add') }}">Add Document</a>
+            <a href="{{ url_for('search') }}">Search User</a>
+            {% if session.get('role_name') == 'admin' %}
+                <a href="{{ url_for('approve_page') }}">Approve Queue</a>
+            {% endif %}
+            <form method="post" action="{{ url_for('logout') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit">Log out</button>
+            </form>
+        </nav>
+    </header>
+
+    <main class="page-shell">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash-box {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <section class="black-banner">
+            <div>
+                <h1>Workspace</h1>
+                <p>Designing clean, intuitive digital &amp; secure experiences — one record at a time.</p>
+            </div>
+            <div class="action-bar" style="margin-top: 0;">
+                <a href="{{ url_for('add') }}" class="btn btn-sm">+ New Document</a>
+                {% if session.get('role_name') == 'admin' %}
+                    <a href="{{ url_for('approve_page') }}" class="btn btn-sm">Review Pending</a>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if session.get('role_name') == 'admin' %}
+        <section class="bento-card">
+            <div class="card-index">01</div>
+            <h2>Users Directory</h2>
+            <p class="subtitle">Active accounts registered in the database.</p>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in user_accounts %}
+                        <tr>
+                            <td>#{{ user.account_id }}</td>
+                            <td><strong>{{ user.username }}</strong></td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <form method="POST" action="/delete/{{ user.account_id }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="bento-card">
+            <div class="card-index">{% if session.get('role_name') == 'admin' %}02{% else %}01{% endif %}</div>
+            <h2>Documents</h2>
+            <p class="subtitle">Filtered according to your role clearance.</p>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Content</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in documents %}
+                        <tr>
+                            <td>#{{ doc.document_id }}</td>
+                            <td><strong>{{ doc.title }}</strong></td>
+                            <td>{{ doc.content }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3">No documents available for your clearance level.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
 </body>
 </html>
-
--->
-<!DOCTYPE html>
-<html>
-<head><title>Users</title></head>
-<body>
-    <h1>Users from Database</h1>
-    <table border="1">
-        <tr>
-            <th>ID</th><th>Name</th><th>Email</th><th>Delete</th>
-        </tr>
-        {% for user in user_accounts %}
-        <tr>
-            <td>{{ user.account_id }}</td>
-            <td>{{ user.username }}</td>
-            <td>{{ user.email }}</td>
-            
-        <!--add a button that uses the delete route-->
-        <!--changed the delete button to map the users on their rows-->
-        <td>
-        <form method="POST" action="/delete/{{ user.account_id }}"> <!--chamged id to account_id to match the database-->
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <button type="submit">Delete</button>
-        </form>
-        </td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <h1>Documents</h1>
-    <table border="1">
-        <tr>
-            <th>ID</th><th>Title</th><th>Content</th>
-        </tr>
-        {% for doc in documents %}
-        <tr>
-            <td>{{ doc.document_id }}</td>
-            <td>{{ doc.title }}</td>
-            <td>{{ doc.content }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <a href="/register"><button>Register</button></a>
-    <a href="/add"><button>Add Document</button></a>
-    <a href="/search"><button>Search User</button></a>
-    <a href="{{ url_for('approve_page') }}"><button>Approve</button></a>
-    <a>Welcome! <a href="{{ url_for('logout') }}">Log Out</a>
-
-
-</body>
-</html>
-
-<!-- in Jinja2 double curly braces (Flask's template engine) outputs a variable. Curly-percent tags is for logic like for loops and if statements.-->

@@ -1,8 +1,72 @@
-<form method="GET" action="/search">
-    <input type="text" name="q" placeholder="Search name..." value="{{ query }}">
-    <button type="submit">Search</button>
-</form>
- 
-{% for user_accounts in results %}
-    <p>{{ user_accounts.username }} - {{ user_accounts.email }}</p>
-{% endfor %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Directory</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <header class="top-nav">
+        <a href="{{ url_for('home') }}" class="brand">
+            just in
+            <span>User Directory Search</span>
+        </a>
+        <nav class="nav-links">
+            <a href="{{ url_for('home') }}">Back to Home</a>
+            <a href="{{ url_for('logout') }}">Log Out</a>
+        </nav>
+    </header>
+
+    <main class="page-shell">
+        <section class="bento-card" style="max-width: 680px; margin: 0 auto;">
+            <div class="card-index">05</div>
+            <h2>Search Users</h2>
+            <p class="subtitle">Query active users in the workspace.</p>
+
+            <form id="search-form" method="GET" action="/search" style="display: flex; gap: 16px; align-items: flex-end; margin-bottom: 32px;">
+                <div style="flex: 1;">
+                    <label for="q">Username Query</label>
+                    <input type="text" id="q" name="q" placeholder="Search name..." value="{{ query }}">
+                </div>
+                <button type="submit" style="margin-top: 0;">Search</button>
+            </form>
+
+            <!-- Added id="results-box" so JavaScript can update just this list without reloading the page -->
+            <div id="results-box" class="bracket-frame">
+                {% for user_accounts in results %}
+                    <p style="padding: 10px 0; border-bottom: 1px solid rgba(20, 20, 20, 0.12); text-align: left; margin-top: 0;">
+                        <strong>@{{ user_accounts.username }}</strong>
+                        {% if user_accounts.email %} — {{ user_accounts.email }}{% endif %}
+                    </p>
+                {% else %}
+                    <p class="subtitle" style="margin-bottom: 0; text-align: left;">No matching active users found.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const searchInput = document.getElementById('q');
+        const resultsBox = document.getElementById('results-box');
+
+        searchInput.addEventListener('input', async function () {
+            const query = searchInput.value;
+            
+            // Fetch the /search route in the background as you type
+            const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+            const htmlText = await response.text();
+
+            // Extract just the updated #results-box from the response and swap it in
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlText, 'text/html');
+            const newResults = doc.getElementById('results-box');
+
+            if (newResults) {
+                resultsBox.innerHTML = newResults.innerHTML;
+            }
+        });
+    </script>
+
+</body>
+</html>

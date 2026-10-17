@@ -1,35 +1,54 @@
 <!DOCTYPE html>
-
-<html>
-    <head>
-        <link rel="stylesheet" href="static/style.css"> 
-    </head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register User</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
 <body>
-    <div class="register-container">
-    <h1>Register User</h1>
+
+    <header class="top-nav">
+        <a href="{{ url_for('login') }}" class="brand">
+            just in
+            <span>Security Portal</span>
+        </a>
+        <nav class="nav-links">
+            <a href="{{ url_for('login') }}">Log In</a>
+        </nav>
+    </header>
+
+    <main class="auth-shell">
+        <div class="bento-card auth-card">
+            <div class="card-index">02</div>
+            <h2>Create Account</h2>
+            <p class="subtitle">Register a new user profile.</p>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% for category, message in messages %}
                     {% if category in ["error", "success", "danger"] %}
-                        <p class="{{ category }}">{{ message }}</p>
+                        <div class="flash-box {{ category }}">{{ message }}</div>
                     {% endif %}
                 {% endfor %}
             {% endwith %}
 
-        <form method = "POST" action = "/register">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <label>Enter username: </label>
-            <input type="text" name="username" required> 
-            <label>Enter email: </label>
-            <input type="email" name="email" required>
-            <label>Create password: </label>
-            <input type="password" name="password" required>
+            <form method="POST" action="/register">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required> 
+                
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+                
+                <label for="password">Password (min. 8 characters)</label>
+                <input type="password" id="password" name="password" required>
 
-                <button type="submit">
-                 Register 
-                 </button>
-        </form>
-        <p>Already have an account? <a href="/login">Login here</a></p>
+                <button type="submit" class="btn-full">Register</button>
+            </form>
+
+            <p class="footer-link">Already have an account? <a href="/login">Login here</a></p>
         </div>
+    </main>
+
 </body>
 </html>
