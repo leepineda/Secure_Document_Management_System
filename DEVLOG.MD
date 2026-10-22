@@ -522,3 +522,11 @@ And also discovered about best effort handling.
 Next are tests and Docker. Gonna re read the decorator and wraps until i can explain it without looking.
 
 </details>
+
+<details>
+<summary>OCT 21 - 22 2026</summary>
+
+Containerized the Secure Document Management System with Docker Compose: three services, web (Flask on gunicorn), db (MySQL 8) and caddy (reverse proxy with HTTPS).
+Ran the app through https://localhost and checked the session inspect option and looked at cookie: HttpOnly, Secure, SameSite=Lax.
+Migrated my existing data from XAMPP’s MySQL into the container by exporting from phpMyAdmin, using it as schema.sql, and resetting the volume
+</details>

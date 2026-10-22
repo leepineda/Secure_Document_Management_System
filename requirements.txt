@@ -1,5 +1,7 @@
-flask
-pymysql
-python-dotenv
-Werkzeug
+Flask
 Flask-WTF
+Flask-Limiter
+PyMySQL
+python-dotenv
+cryptography
+gunicorn

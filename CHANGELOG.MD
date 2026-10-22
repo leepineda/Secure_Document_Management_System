@@ -3,6 +3,22 @@ Changelog
 All notable changes to this project are documented here.
 Format: Added / Changed / Fixed / Removed / Security / Known Issues / Planned
 
+## 1.0.7
+
+Added
+---
+- Dockerized the app
+- Migrated the old database to docker 
+
+Security 
+---
+- added proxy fix so real ips are recorded
+
+Planned
+---
+- Add pytest tests
+- Run SAST (Bandit) and DAST (OWASP ZAP); document findings
+
 ## 1.0.6 
 started 2026-10-04
 

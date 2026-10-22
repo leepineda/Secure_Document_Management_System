@@ -27,6 +27,10 @@ limiter = Limiter(
     storage_uri="memory://"
 )
 
+#added this so real IP addresses gets used
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
 app.secret_key = os.getenv("SECRET_KEY")
 
 csrf = CSRFProtect(app)
@@ -74,7 +78,7 @@ def roles_required(*allowed_roles):
 @app.before_request #this function validates the user if they are deleted or not, and also to for checking roles
 def check_session_still_valid():
 
-    if request.endpoint in ("login", "register", "logout", "static"):
+    if request.endpoint in ("login", "register", "logout", "static", "add", "approve", "index", "search"):
         return
  
     if "account_id" not in session:

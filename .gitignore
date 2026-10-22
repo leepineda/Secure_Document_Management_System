@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 .txt
 App.md
+schema.sql
+full_dump.sql
+backup.sql
