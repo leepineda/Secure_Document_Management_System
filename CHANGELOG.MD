@@ -8,7 +8,7 @@ Format: Added / Changed / Fixed / Removed / Security / Known Issues / Planned
 Added
 ---
 - Dockerized the app
-- Migrated the old database to docker 
+- Migrated the old database to docker since xampp isnt connected on it
 
 Security 
 ---

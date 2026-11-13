@@ -530,3 +530,6 @@ Containerized the Secure Document Management System with Docker Compose: three s
 Ran the app through https://localhost and checked the session inspect option and looked at cookie: HttpOnly, Secure, SameSite=Lax.
 Migrated my existing data from XAMPP’s MySQL into the container by exporting from phpMyAdmin, using it as schema.sql, and resetting the volume.
 </details>
+
+Now learning REST and making a new branch for it
+Added some rest branches but it seems to not work, i will look at it tomorrow

@@ -65,11 +65,10 @@ def roles_required(*allowed_roles):
         @wraps(view) #keeps the original function name, Flask uses it as the endpoint name
         def wrapped(*args, **kwargs):
             if "account_id" not in session:
-                return jsonify({"error": "Authentication required"}), 401
-
+                return redirect(url_for("login"))
             if session.get("role_name") not in allowed_roles:
                 try_log_event("Unauthorized Access", "DENIED", session["account_id"], resource=request.endpoint)
-                return jsonify({"error": "Forbidden"}), 403
+                return "Forbidden", 403
 
             return view(*args, **kwargs)
         return wrapped
@@ -92,7 +91,7 @@ def api_roles_required(*allowed_roles):
 @app.before_request #this function validates the user if they are deleted or not, and also to for checking roles
 def check_session_still_valid():
 
-    if request.endpoint in ("login", "register", "logout", "static", "add", "approve", "index", "search"):
+    if request.endpoint in ("login", "register", "logout", "static"):
         return
  
     if "account_id" not in session:
