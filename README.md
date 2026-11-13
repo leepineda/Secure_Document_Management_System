@@ -69,3 +69,4 @@ Documentation is treated as a core deliverable of this project:
 
 ## Author
 Justine Lee G. Pineda, [github.com/leepineda](https://github.com/leepineda)
+Added commits
