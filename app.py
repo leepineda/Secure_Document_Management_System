@@ -2,7 +2,7 @@ import os
 import re #for regex expressions
 from functools import wraps #for the decorators
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, session, flash, url_for
+from flask import Flask, render_template, request, redirect, session, flash, url_for, jsonify
 from werkzeug.security import generate_password_hash #added scrypt import
 from werkzeug.security import check_password_hash #for checking hash
 import pymysql
@@ -65,12 +65,26 @@ def roles_required(*allowed_roles):
         @wraps(view) #keeps the original function name, Flask uses it as the endpoint name
         def wrapped(*args, **kwargs):
             if "account_id" not in session:
-                return redirect(url_for("login")) #no flash here, a flash on a page that never shows it leaks to the next page
+                return jsonify({"error": "Authentication required"}), 401
 
             if session.get("role_name") not in allowed_roles:
                 try_log_event("Unauthorized Access", "DENIED", session["account_id"], resource=request.endpoint)
-                return "Unauthorized: You do not have permission to perform this action.", 403
+                return jsonify({"error": "Forbidden"}), 403
 
+            return view(*args, **kwargs)
+        return wrapped
+    return decorator
+
+def api_roles_required(*allowed_roles):
+    """Same rule as roles_required, but answers with JSON + status codes instead of redirecting."""
+    def decorator(view):
+        @wraps(view)
+        def wrapped(*args, **kwargs):
+            if "account_id" not in session:
+                return jsonify({"error": "Authentication required"}), 401
+            if session.get("role_name") not in allowed_roles:
+                try_log_event("Unauthorized Access", "DENIED", session["account_id"], resource=request.endpoint)
+                return jsonify({"error": "Forbidden"}), 403
             return view(*args, **kwargs)
         return wrapped
     return decorator
@@ -125,6 +139,31 @@ def check_session_still_valid():
         session.clear()
         flash("Your session has ended. Please log in again.", "error")
         return redirect(url_for("login"))
+
+#REST: GET /api/v1/documents
+@app.route("/api/v1/documents", methods=["GET"])
+@api_roles_required("admin", "moderator", "user")
+def api_get_documents():
+    role = session["role_name"]
+    
+    sql = ("SELECT document_id, title, content, status, clearance_required "
+           "FROM documents WHERE is_deleted = FALSE")
+    if role == "moderator":
+        sql += " AND clearance_required IN ('public', 'internal') AND status = 'approved'"
+    elif role == "user":
+        sql += " AND clearance_required = 'public' AND status = 'approved'"
+ 
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(sql)
+            documents = cursor.fetchall()
+        return jsonify({"documents": documents}), 200
+    except Exception as e:
+        print(f"Database error: {e}")
+        return jsonify({"error": "Could not load documents"}), 500
+    finally:
+        connection.close()
 
 @app.route("/")
 @roles_required("admin", "moderator", "user")
